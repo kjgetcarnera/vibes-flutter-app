@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/auth_result.dart';
+import 'auth_session.dart';
 
 class AuthException implements Exception {
   final String message;
@@ -44,7 +45,14 @@ class AuthApiService {
       final body = jsonDecode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return AuthResult.fromJson(body);
+        final result = AuthResult.fromJson(body);
+        AuthSession.instance.save(
+          accessToken: result.accessToken,
+          userId: result.user.id,
+          onboardingStatus: result.user.onboardingStatus,
+        );
+        print('[AUTH] Session saved. userId=${result.user.id} onboarding=${result.user.onboardingStatus}');
+        return result;
       }
 
       final message = _extractError(body, response.statusCode);
@@ -86,7 +94,14 @@ class AuthApiService {
       final body = jsonDecode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return AuthResult.fromJson(body);
+        final result = AuthResult.fromJson(body);
+        AuthSession.instance.save(
+          accessToken: result.accessToken,
+          userId: result.user.id,
+          onboardingStatus: result.user.onboardingStatus,
+        );
+        print('[AUTH] Session saved. userId=${result.user.id} onboarding=${result.user.onboardingStatus}');
+        return result;
       }
 
       final message = _extractError(body, response.statusCode);
