@@ -8,8 +8,8 @@ import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
-import '../../../core/services/vibe_api_service.dart';
 import '../../../core/widgets/app_icon_badge.dart';
+import 'vibe_loading_screen.dart';
 
 const _passage =
     'My voice shows my brain.\nMy brain responds to sound.\nSound changes my state.\n\n'
@@ -95,45 +95,28 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
     if (_isSubmitting) return;
     setState(() => _isSubmitting = true);
 
-    print('[VibeCheck] isRecording=$_isRecording isPaused=$_isPaused');
-
     final path = await _recorder.stop();
     setState(() => _isRecording = false);
 
-    print('[VibeCheck] recorded file path: $path');
-
     if (path == null) {
-      print(
-        '[VibeCheck] ERROR: path is null — recording never started or failed',
-      );
       _showError('Recording failed. Please try again.');
       setState(() => _isSubmitting = false);
       return;
     }
 
-    final file = File(path);
-    final fileSize = await file.exists() ? await file.length() : -1;
-    print(
-      '[VibeCheck] file exists: ${await file.exists()}, size: $fileSize bytes',
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => VibeLoadingScreen(
+          firstName: widget.firstName,
+          age: widget.age,
+          audioFile: File(path),
+        ),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 500),
+      ),
     );
-    print(
-      '[VibeCheck] payload → firstName: ${widget.firstName}, age: ${widget.age}',
-    );
-
-    try {
-      await VibeApiService.submitVibeCheck(
-        firstName: widget.firstName,
-        age: widget.age,
-        audioFile: file,
-      );
-      print('[VibeCheck] API success');
-    } catch (e) {
-      print('[VibeCheck] API ERROR (skipped for now): $e');
-    }
-
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
   }
 
   Future<void> _cancel() async {
