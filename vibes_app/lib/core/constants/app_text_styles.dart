@@ -49,6 +49,25 @@ class AppTextStyles {
     letterSpacing: 1.2,
   );
 
+  // ── Kamerik 105 ──────────────────────────────────────────────
+  static const TextStyle kamerikToggle = TextStyle(
+    fontFamily: 'Kamerik105',
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
+    color: Color(0xFFFFFEFE),
+    height: 24 / 18,
+    letterSpacing: -0.36,
+  );
+
+  static const TextStyle kamerikInput = TextStyle(
+    fontFamily: 'Kamerik105',
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
+    color: Color(0x80FFFEFE),
+    height: 19 / 14,
+    letterSpacing: -0.15,
+  );
+
   static TextStyle get talkLabel => GoogleFonts.spaceMono(
     fontSize: 11,
     fontWeight: FontWeight.w700,

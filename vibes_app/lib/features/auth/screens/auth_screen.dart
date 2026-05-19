@@ -336,7 +336,7 @@ class _AuthPanel extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: AppPrimaryButton(
-              label: 'CONTINUE',
+              label: 'Continue',
               onTap: onContinue,
               enabled: isFormValid,
               height: 50,
@@ -402,10 +402,10 @@ class _Tab extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             label,
-            style: AppTextStyles.labelSmall.copyWith(
-              color: active ? AppColors.textPrimary : AppColors.textSecondary,
-              fontSize: 14,
-              letterSpacing: 0.2,
+            style: AppTextStyles.kamerikToggle.copyWith(
+              color: active
+                  ? const Color(0xFFFFFEFE)
+                  : const Color(0xFFFFFEFE).withAlpha(100),
             ),
           ),
         ),
@@ -466,17 +466,13 @@ class _AuthField extends StatelessWidget {
                   obscureText: obscure,
                   keyboardType: keyboardType,
                   onChanged: onChanged,
-                  style: AppTextStyles.bodyMono.copyWith(
-                    color: AppColors.textPrimary,
-                    fontSize: 14,
+                  style: AppTextStyles.kamerikInput.copyWith(
+                    color: const Color(0xFFFFFEFE),
                   ),
                   cursorColor: AppColors.accentCyan,
                   decoration: InputDecoration(
                     hintText: hint,
-                    hintStyle: AppTextStyles.bodyMono.copyWith(
-                      color: AppColors.textMuted,
-                      fontSize: 14,
-                    ),
+                    hintStyle: AppTextStyles.kamerikInput,
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(vertical: 16),
                   ),

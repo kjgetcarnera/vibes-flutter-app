@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
-import '../constants/app_text_styles.dart';
 
 class AppPrimaryButton extends StatelessWidget {
   const AppPrimaryButton({
@@ -20,9 +19,13 @@ class AppPrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final child = Text(
       label,
-      style: AppTextStyles.labelSmall.copyWith(
-        fontSize: 13,
-        letterSpacing: 2,
+      style: const TextStyle(
+        fontFamily: 'Kamerik105',
+        fontSize: 18,
+        fontWeight: FontWeight.w500,
+        letterSpacing: -0.36,
+        height: 24 / 18,
+      ).copyWith(
         color: enabled ? AppColors.textPrimary : AppColors.textMuted,
       ),
     );
@@ -41,7 +44,7 @@ class AppPrimaryButton extends StatelessWidget {
                 height: height,
                 decoration: BoxDecoration(
                   gradient: AppColors.accentGradient,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(30),
                 ),
               ),
             ),
@@ -53,7 +56,7 @@ class AppPrimaryButton extends StatelessWidget {
                 height: height,
                 decoration: BoxDecoration(
                   color: AppColors.knobCenter,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(30),
                 ),
               ),
             ),

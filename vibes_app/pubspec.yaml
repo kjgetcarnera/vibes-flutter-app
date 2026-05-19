@@ -45,3 +45,15 @@ flutter:
   assets:
     - assets/images/
 
+  fonts:
+    - family: Kamerik105
+      fonts:
+        - asset: assets/fonts/kamerik_105_light.otf
+          weight: 300
+        - asset: assets/fonts/kamerik_105_medium.otf
+          weight: 500
+        - asset: assets/fonts/kamerik_105_bold.otf
+          weight: 700
+        - asset: assets/fonts/kamerik_105_heavy.otf
+          weight: 900
+
