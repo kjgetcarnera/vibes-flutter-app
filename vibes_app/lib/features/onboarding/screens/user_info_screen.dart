@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
-import '../widgets/onboarding_bottom_panel.dart';
+import '../../../core/widgets/app_icon_badge.dart';
+import '../../../core/widgets/app_input_field.dart';
+import '../../../core/widgets/app_primary_button.dart';
 
 class UserInfoScreen extends StatefulWidget {
   const UserInfoScreen({super.key});
@@ -105,13 +106,8 @@ class _UserInfoScreenState extends State<UserInfoScreen>
     );
 
     final mq = MediaQuery.of(context);
-    final screenHeight = mq.size.height;
-    final screenWidth = mq.size.width;
     final bottomPad = mq.padding.bottom;
     final topPad = mq.padding.top;
-
-    final panelHeight = screenHeight * 0.40;
-    final knobSize = (screenWidth * 0.38).clamp(120.0, 185.0);
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -120,7 +116,6 @@ class _UserInfoScreenState extends State<UserInfoScreen>
         resizeToAvoidBottomInset: true,
         body: Column(
           children: [
-            // ── Scrollable content (60%) ──
             Expanded(
               child: FadeTransition(
                 opacity: _fadeAnimation,
@@ -137,13 +132,11 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // App icon badge
                         Align(
                           alignment: Alignment.centerRight,
-                          child: _AppIconBadge(),
+                          child: AppIconBadge(),
                         ),
-                        const SizedBox(height: 32),
-
+                        const SizedBox(height: 10),
                         Text(
                           'Tell us about\nyourself.',
                           style: AppTextStyles.displayLarge,
@@ -153,27 +146,25 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                           'Just two things to get started.',
                           style: AppTextStyles.bodyMono,
                         ),
-                        const SizedBox(height: 36),
-
-                        // First name field
-                        _InputField(
+                        const SizedBox(height: 30),
+                        AppInputField(
                           label: 'FIRST NAME',
                           controller: _firstNameController,
                           focusNode: _firstNameFocus,
                           error: _firstNameError,
+                          hintText: 'Your name',
                           keyboardType: TextInputType.name,
                           textCapitalization: TextCapitalization.words,
                           textInputAction: TextInputAction.next,
                           onSubmitted: (_) => _ageFocus.requestFocus(),
                         ),
                         const SizedBox(height: 20),
-
-                        // Age field
-                        _InputField(
+                        AppInputField(
                           label: 'AGE',
                           controller: _ageController,
                           focusNode: _ageFocus,
                           error: _ageError,
+                          hintText: 'Your age',
                           keyboardType: TextInputType.number,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
@@ -182,13 +173,6 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                           textInputAction: TextInputAction.done,
                           onSubmitted: (_) => _onNext(),
                         ),
-                        const SizedBox(height: 36),
-
-                        // Next button
-                        SizedBox(
-                          width: double.infinity,
-                          child: _NextButton(onTap: _onNext),
-                        ),
                       ],
                     ),
                   ),
@@ -196,164 +180,16 @@ class _UserInfoScreenState extends State<UserInfoScreen>
               ),
             ),
 
-            // ── Bottom control panel (40%) ──
-            OnboardingBottomPanel(
-              panelHeight: panelHeight,
-              knobSize: knobSize,
-              bottomPad: bottomPad,
-              isRecording: false,
-              talkEnabled: false,
-              talkAnimationEnabled: false,
-              onTalkTap: () {},
-              title: 'About You',
-              subtitle: 'Fill in your details.',
-              pageCount: 5,
-              activeIndex: 1,
-              onClose: () => Navigator.maybePop(context),
+            // ── Next button pinned to bottom ──
+            Padding(
+              padding: EdgeInsets.fromLTRB(24, 12, 24, bottomPad + 24),
+              child: SizedBox(
+                width: double.infinity,
+                child: AppPrimaryButton(label: 'NEXT', onTap: _onNext),
+              ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// Input field
-// ─────────────────────────────────────────────────────────────
-class _InputField extends StatelessWidget {
-  const _InputField({
-    required this.label,
-    required this.controller,
-    required this.focusNode,
-    this.error,
-    this.keyboardType = TextInputType.text,
-    this.textCapitalization = TextCapitalization.none,
-    this.textInputAction = TextInputAction.done,
-    this.inputFormatters,
-    this.onSubmitted,
-  });
-
-  final String label;
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final String? error;
-  final TextInputType keyboardType;
-  final TextCapitalization textCapitalization;
-  final TextInputAction textInputAction;
-  final List<TextInputFormatter>? inputFormatters;
-  final ValueChanged<String>? onSubmitted;
-
-  @override
-  Widget build(BuildContext context) {
-    final hasError = error != null;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: AppTextStyles.caption),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          focusNode: focusNode,
-          keyboardType: keyboardType,
-          textCapitalization: textCapitalization,
-          textInputAction: textInputAction,
-          inputFormatters: inputFormatters,
-          onSubmitted: onSubmitted,
-          style: AppTextStyles.displayLarge.copyWith(fontSize: 20),
-          cursorColor: AppColors.accentCyan,
-          decoration: InputDecoration(
-            hintText: label == 'FIRST NAME' ? 'Your name' : 'Your age',
-            hintStyle: AppTextStyles.bodyMono.copyWith(
-              color: AppColors.textMuted,
-            ),
-            filled: true,
-            fillColor: AppColors.knobCenter,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: hasError
-                    ? Colors.redAccent.withAlpha(180)
-                    : AppColors.knobOuter,
-                width: 1,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: hasError ? Colors.redAccent : AppColors.accentCyan,
-                width: 1.5,
-              ),
-            ),
-          ),
-        ),
-        if (hasError) ...[
-          const SizedBox(height: 6),
-          Text(
-            error!,
-            style: AppTextStyles.caption.copyWith(
-              color: Colors.redAccent,
-              letterSpacing: 0.4,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// Next button
-// ─────────────────────────────────────────────────────────────
-class _NextButton extends StatelessWidget {
-  const _NextButton({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 52,
-        decoration: BoxDecoration(
-          gradient: AppColors.accentGradient,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          'NEXT',
-          style: AppTextStyles.labelSmall.copyWith(
-            fontSize: 13,
-            letterSpacing: 2,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// App icon badge
-// ─────────────────────────────────────────────────────────────
-class _AppIconBadge extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 52,
-      height: 52,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.knobCenter,
-        border: Border.all(color: AppColors.knobOuter, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Image.asset(AppAssets.appIcon, fit: BoxFit.contain),
       ),
     );
   }
