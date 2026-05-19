@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/constants/app_assets.dart';
+import '../../../core/widgets/app_primary_button.dart';
 import '../../onboarding/screens/user_info_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -30,6 +31,15 @@ class _AuthScreenState extends State<AuthScreen>
   String? _passwordError;
   String? _confirmPasswordError;
 
+  bool get _isFormValid {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final emailOk = email.isNotEmpty && email.contains('@');
+    final passwordOk = password.length >= 6;
+    final confirmOk = !_isSignUp || _confirmPasswordController.text == password;
+    return emailOk && passwordOk && confirmOk;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +51,10 @@ class _AuthScreenState extends State<AuthScreen>
       parent: _fadeController,
       curve: Curves.easeOut,
     );
+    // Rebuild when any field changes so button enables/disables live
+    _emailController.addListener(() => setState(() {}));
+    _passwordController.addListener(() => setState(() {}));
+    _confirmPasswordController.addListener(() => setState(() {}));
   }
 
   @override
@@ -131,7 +145,11 @@ class _AuthScreenState extends State<AuthScreen>
             // ── Top logo area ──
             Expanded(
               child: Padding(
-                padding: EdgeInsets.only(top: topPad + 24, left: 28),
+                padding: EdgeInsets.only(
+                  top: topPad + 24,
+                  left: 28,
+                  bottom: 30,
+                ),
                 child: Align(
                   alignment: Alignment.bottomLeft,
                   child: _LogoRow(),
@@ -161,15 +179,16 @@ class _AuthScreenState extends State<AuthScreen>
                 if (_emailError != null) setState(() => _emailError = null);
               },
               onPasswordChanged: (_) {
-                if (_passwordError != null)
+                if (_passwordError != null) {
                   setState(() => _passwordError = null);
+                }
               },
               onConfirmPasswordChanged: (_) {
                 if (_confirmPasswordError != null) {
                   setState(() => _confirmPasswordError = null);
                 }
               },
-              onBack: () => Navigator.of(context).maybePop(),
+              isFormValid: _isFormValid,
               onContinue: _onContinue,
             ),
           ],
@@ -185,11 +204,7 @@ class _AuthScreenState extends State<AuthScreen>
 class _LogoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      AppAssets.splash,
-      width: 180,
-      fit: BoxFit.contain,
-    );
+    return Image.asset(AppAssets.splash, width: 180, fit: BoxFit.contain);
   }
 }
 
@@ -215,7 +230,7 @@ class _AuthPanel extends StatelessWidget {
     required this.onEmailChanged,
     required this.onPasswordChanged,
     required this.onConfirmPasswordChanged,
-    required this.onBack,
+    required this.isFormValid,
     required this.onContinue,
   });
 
@@ -236,7 +251,7 @@ class _AuthPanel extends StatelessWidget {
   final ValueChanged<String> onEmailChanged;
   final ValueChanged<String> onPasswordChanged;
   final ValueChanged<String> onConfirmPasswordChanged;
-  final VoidCallback onBack;
+  final bool isFormValid;
   final VoidCallback onContinue;
 
   @override
@@ -252,7 +267,7 @@ class _AuthPanel extends StatelessWidget {
         children: [
           // Toggle pill
           _TogglePill(isSignUp: isSignUp, onToggle: onToggleMode),
-          const SizedBox(height: 24),
+          const SizedBox(height: 30),
 
           // Fields animate when switching
           FadeTransition(
@@ -268,7 +283,7 @@ class _AuthPanel extends StatelessWidget {
                   error: emailError,
                   onChanged: onEmailChanged,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 20),
 
                 // Password
                 _AuthField(
@@ -292,7 +307,7 @@ class _AuthPanel extends StatelessWidget {
 
                 // Confirm Password (sign up only)
                 if (isSignUp) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 20),
                   _AuthField(
                     hint: 'Confirm Password',
                     prefixIcon: Icons.lock_outline,
@@ -318,25 +333,14 @@ class _AuthPanel extends StatelessWidget {
 
           const SizedBox(height: 32),
 
-          // Back + Continue
-          Row(
-            children: [
-              Expanded(
-                child: _PillButton(
-                  label: 'Back',
-                  onTap: onBack,
-                  primary: false,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _PillButton(
-                  label: 'Continue',
-                  onTap: onContinue,
-                  primary: true,
-                ),
-              ),
-            ],
+          SizedBox(
+            width: double.infinity,
+            child: AppPrimaryButton(
+              label: 'CONTINUE',
+              onTap: onContinue,
+              enabled: isFormValid,
+              height: 50,
+            ),
           ),
         ],
       ),
@@ -496,44 +500,6 @@ class _AuthField extends StatelessWidget {
           ),
         ],
       ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// Pill button
-// ─────────────────────────────────────────────────────────────
-class _PillButton extends StatelessWidget {
-  const _PillButton({
-    required this.label,
-    required this.onTap,
-    required this.primary,
-  });
-
-  final String label;
-  final VoidCallback onTap;
-  final bool primary;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 52,
-        decoration: BoxDecoration(
-          color: primary ? AppColors.knobOuter : AppColors.knobCenter,
-          borderRadius: BorderRadius.circular(30),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: AppTextStyles.labelSmall.copyWith(
-            fontSize: 15,
-            letterSpacing: 0.3,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
     );
   }
 }

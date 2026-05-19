@@ -8,29 +8,60 @@ class AppPrimaryButton extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.height = 52,
+    this.enabled = true,
   });
 
   final String label;
   final VoidCallback onTap;
   final double height;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
+    final child = Text(
+      label,
+      style: AppTextStyles.labelSmall.copyWith(
+        fontSize: 13,
+        letterSpacing: 2,
+        color: enabled ? AppColors.textPrimary : AppColors.textMuted,
+      ),
+    );
+
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
+      onTap: enabled ? onTap : null,
+      child: SizedBox(
         height: height,
-        decoration: BoxDecoration(
-          gradient: AppColors.accentGradient,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: AppTextStyles.labelSmall.copyWith(
-            fontSize: 13,
-            letterSpacing: 2,
-          ),
+        child: Stack(
+          children: [
+            // Gradient layer (enabled)
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 250),
+              opacity: enabled ? 1.0 : 0.0,
+              child: Container(
+                height: height,
+                decoration: BoxDecoration(
+                  gradient: AppColors.accentGradient,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+            // Solid grey layer (disabled)
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 250),
+              opacity: enabled ? 0.0 : 1.0,
+              child: Container(
+                height: height,
+                decoration: BoxDecoration(
+                  color: AppColors.knobCenter,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+            // Label always on top
+            Positioned.fill(
+              child: Align(alignment: Alignment.center, child: child),
+            ),
+          ],
         ),
       ),
     );
