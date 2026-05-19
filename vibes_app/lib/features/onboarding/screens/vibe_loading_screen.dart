@@ -95,7 +95,8 @@ class _VibeLoadingScreenState extends State<VibeLoadingScreen>
             AnimatedBuilder(
               animation: _controller,
               builder: (_, child) {
-                final pulse = 0.9 + 0.1 * math.sin(_controller.value * 2 * math.pi);
+                final pulse =
+                    0.9 + 0.1 * math.sin(_controller.value * 2 * math.pi);
                 return Transform.scale(
                   scale: pulse,
                   child: Transform.rotate(
@@ -121,4 +122,3 @@ class _VibeLoadingScreenState extends State<VibeLoadingScreen>
     );
   }
 }
-
