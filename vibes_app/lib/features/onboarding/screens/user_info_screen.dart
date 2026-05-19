@@ -156,6 +156,11 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                           keyboardType: TextInputType.name,
                           textCapitalization: TextCapitalization.words,
                           textInputAction: TextInputAction.next,
+                          onChanged: (_) {
+                            if (_firstNameError != null) {
+                              setState(() => _firstNameError = null);
+                            }
+                          },
                           onSubmitted: (_) => _ageFocus.requestFocus(),
                         ),
                         const SizedBox(height: 20),
@@ -171,6 +176,11 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                             LengthLimitingTextInputFormatter(3),
                           ],
                           textInputAction: TextInputAction.done,
+                          onChanged: (_) {
+                            if (_ageError != null) {
+                              setState(() => _ageError = null);
+                            }
+                          },
                           onSubmitted: (_) => _onNext(),
                         ),
                       ],

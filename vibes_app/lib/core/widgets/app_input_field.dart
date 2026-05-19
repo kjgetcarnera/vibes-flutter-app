@@ -16,6 +16,7 @@ class AppInputField extends StatelessWidget {
     this.textInputAction = TextInputAction.done,
     this.inputFormatters,
     this.onSubmitted,
+    this.onChanged,
   });
 
   final String label;
@@ -28,6 +29,7 @@ class AppInputField extends StatelessWidget {
   final TextInputAction textInputAction;
   final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onSubmitted;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +47,7 @@ class AppInputField extends StatelessWidget {
           textCapitalization: textCapitalization,
           textInputAction: textInputAction,
           inputFormatters: inputFormatters,
+          onChanged: onChanged,
           onSubmitted: onSubmitted,
           style: AppTextStyles.displayLarge.copyWith(fontSize: 20),
           cursorColor: AppColors.accentCyan,
