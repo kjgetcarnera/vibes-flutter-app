@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/constants/app_assets.dart';
+import '../../../core/services/auth_api_service.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../onboarding/screens/user_info_screen.dart';
 
@@ -26,6 +27,8 @@ class _AuthScreenState extends State<AuthScreen>
 
   bool _showPassword = false;
   bool _showConfirmPassword = false;
+  bool _isLoading = false;
+  String? _apiError;
 
   String? _emailError;
   String? _passwordError;
@@ -108,18 +111,46 @@ class _AuthScreenState extends State<AuthScreen>
     return valid;
   }
 
-  void _onContinue() {
+  Future<void> _onContinue() async {
     FocusScope.of(context).unfocus();
     if (!_validate()) return;
 
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (_, __, ___) => const UserInfoScreen(),
-        transitionsBuilder: (_, anim, __, child) =>
-            FadeTransition(opacity: anim, child: child),
-        transitionDuration: const Duration(milliseconds: 500),
-      ),
-    );
+    setState(() {
+      _isLoading = true;
+      _apiError = null;
+    });
+
+    try {
+      if (_isSignUp) {
+        await AuthApiService.signUp(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+      } else {
+        await AuthApiService.login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+      }
+
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const UserInfoScreen(),
+          transitionsBuilder: (_, anim, __, child) =>
+              FadeTransition(opacity: anim, child: child),
+          transitionDuration: const Duration(milliseconds: 500),
+        ),
+      );
+    } on AuthException catch (e) {
+      setState(() => _apiError = e.message);
+    } catch (_) {
+      setState(
+        () => _apiError = 'Network error. Please check your connection.',
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -169,6 +200,8 @@ class _AuthScreenState extends State<AuthScreen>
               emailError: _emailError,
               passwordError: _passwordError,
               confirmPasswordError: _confirmPasswordError,
+              apiError: _apiError,
+              isLoading: _isLoading,
               bottomPad: bottomPad,
               onToggleMode: _switchMode,
               onTogglePassword: () =>
@@ -177,18 +210,19 @@ class _AuthScreenState extends State<AuthScreen>
                   setState(() => _showConfirmPassword = !_showConfirmPassword),
               onEmailChanged: (_) {
                 if (_emailError != null) setState(() => _emailError = null);
+                if (_apiError != null) setState(() => _apiError = null);
               },
               onPasswordChanged: (_) {
-                if (_passwordError != null) {
+                if (_passwordError != null)
                   setState(() => _passwordError = null);
-                }
+                if (_apiError != null) setState(() => _apiError = null);
               },
               onConfirmPasswordChanged: (_) {
                 if (_confirmPasswordError != null) {
                   setState(() => _confirmPasswordError = null);
                 }
               },
-              isFormValid: _isFormValid,
+              isFormValid: _isFormValid && !_isLoading,
               onContinue: _onContinue,
             ),
           ],
@@ -232,6 +266,8 @@ class _AuthPanel extends StatelessWidget {
     required this.onConfirmPasswordChanged,
     required this.isFormValid,
     required this.onContinue,
+    required this.isLoading,
+    this.apiError,
   });
 
   final bool isSignUp;
@@ -252,7 +288,9 @@ class _AuthPanel extends StatelessWidget {
   final ValueChanged<String> onPasswordChanged;
   final ValueChanged<String> onConfirmPasswordChanged;
   final bool isFormValid;
-  final VoidCallback onContinue;
+  final Future<void> Function() onContinue;
+  final bool isLoading;
+  final String? apiError;
 
   @override
   Widget build(BuildContext context) {
@@ -331,16 +369,50 @@ class _AuthPanel extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 32),
+          if (apiError != null) ...[
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.redAccent.withAlpha(30),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.redAccent.withAlpha(120)),
+              ),
+              child: Text(
+                apiError!,
+                style: AppTextStyles.caption.copyWith(
+                  color: Colors.redAccent,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 24),
 
           SizedBox(
             width: double.infinity,
-            child: AppPrimaryButton(
-              label: 'Continue',
-              onTap: onContinue,
-              enabled: isFormValid,
-              height: 50,
-            ),
+            child: isLoading
+                ? const SizedBox(
+                    height: 50,
+                    child: Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Color(0xFF00E5CC),
+                        ),
+                      ),
+                    ),
+                  )
+                : AppPrimaryButton(
+                    label: 'Continue',
+                    onTap: onContinue,
+                    enabled: isFormValid,
+                    height: 50,
+                  ),
           ),
         ],
       ),
