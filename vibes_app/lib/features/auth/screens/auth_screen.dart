@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
@@ -76,6 +77,7 @@ class _AuthScreenState extends State<AuthScreen>
       _emailError = null;
       _passwordError = null;
       _confirmPasswordError = null;
+      _apiError = null;
     });
     _fadeController.forward(from: 0);
   }
@@ -171,60 +173,76 @@ class _AuthScreenState extends State<AuthScreen>
       child: Scaffold(
         backgroundColor: AppColors.background,
         resizeToAvoidBottomInset: true,
-        body: Column(
+        body: Stack(
           children: [
-            // ── Top logo area ──
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: topPad + 24,
-                  left: 28,
-                  bottom: 30,
+            // ── Main content ──
+            Column(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: topPad + 24,
+                      left: 28,
+                      bottom: 30,
+                    ),
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: _LogoRow(),
+                    ),
+                  ),
                 ),
-                child: Align(
-                  alignment: Alignment.bottomLeft,
-                  child: _LogoRow(),
+                _AuthPanel(
+                  isSignUp: _isSignUp,
+                  fadeAnimation: _fadeAnimation,
+                  emailController: _emailController,
+                  passwordController: _passwordController,
+                  confirmPasswordController: _confirmPasswordController,
+                  showPassword: _showPassword,
+                  showConfirmPassword: _showConfirmPassword,
+                  emailError: _emailError,
+                  passwordError: _passwordError,
+                  confirmPasswordError: _confirmPasswordError,
+                  apiError: _apiError,
+                  isLoading: _isLoading,
+                  bottomPad: bottomPad,
+                  onToggleMode: _switchMode,
+                  onTogglePassword: () =>
+                      setState(() => _showPassword = !_showPassword),
+                  onToggleConfirmPassword: () => setState(
+                    () => _showConfirmPassword = !_showConfirmPassword,
+                  ),
+                  onEmailChanged: (_) {
+                    if (_emailError != null) setState(() => _emailError = null);
+                    if (_apiError != null) setState(() => _apiError = null);
+                  },
+                  onPasswordChanged: (_) {
+                    if (_passwordError != null) {
+                      setState(() => _passwordError = null);
+                    }
+                    if (_apiError != null) setState(() => _apiError = null);
+                  },
+                  onConfirmPasswordChanged: (_) {
+                    if (_confirmPasswordError != null) {
+                      setState(() => _confirmPasswordError = null);
+                    }
+                  },
+                  isFormValid: _isFormValid && !_isLoading,
+                  onContinue: _onContinue,
                 ),
-              ),
+              ],
             ),
 
-            // ── Bottom panel ──
-            _AuthPanel(
-              isSignUp: _isSignUp,
-              fadeAnimation: _fadeAnimation,
-              emailController: _emailController,
-              passwordController: _passwordController,
-              confirmPasswordController: _confirmPasswordController,
-              showPassword: _showPassword,
-              showConfirmPassword: _showConfirmPassword,
-              emailError: _emailError,
-              passwordError: _passwordError,
-              confirmPasswordError: _confirmPasswordError,
-              apiError: _apiError,
-              isLoading: _isLoading,
-              bottomPad: bottomPad,
-              onToggleMode: _switchMode,
-              onTogglePassword: () =>
-                  setState(() => _showPassword = !_showPassword),
-              onToggleConfirmPassword: () =>
-                  setState(() => _showConfirmPassword = !_showConfirmPassword),
-              onEmailChanged: (_) {
-                if (_emailError != null) setState(() => _emailError = null);
-                if (_apiError != null) setState(() => _apiError = null);
-              },
-              onPasswordChanged: (_) {
-                if (_passwordError != null)
-                  setState(() => _passwordError = null);
-                if (_apiError != null) setState(() => _apiError = null);
-              },
-              onConfirmPasswordChanged: (_) {
-                if (_confirmPasswordError != null) {
-                  setState(() => _confirmPasswordError = null);
-                }
-              },
-              isFormValid: _isFormValid && !_isLoading,
-              onContinue: _onContinue,
-            ),
+            // ── Loading overlay ──
+            if (_isLoading)
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                  child: Container(
+                    color: Colors.black.withAlpha(100),
+                    child: const Center(child: _VaiaLoadingIndicator()),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -393,26 +411,12 @@ class _AuthPanel extends StatelessWidget {
 
           SizedBox(
             width: double.infinity,
-            child: isLoading
-                ? const SizedBox(
-                    height: 50,
-                    child: Center(
-                      child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Color(0xFF00E5CC),
-                        ),
-                      ),
-                    ),
-                  )
-                : AppPrimaryButton(
-                    label: 'Continue',
-                    onTap: onContinue,
-                    enabled: isFormValid,
-                    height: 50,
-                  ),
+            child: AppPrimaryButton(
+              label: 'Continue',
+              onTap: onContinue,
+              enabled: isFormValid,
+              height: 50,
+            ),
           ),
         ],
       ),
@@ -570,4 +574,112 @@ class _AuthField extends StatelessWidget {
       ],
     );
   }
+}
+
+// ─────────────────────────────────────────────────────────────
+// VAIA loading indicator
+// ─────────────────────────────────────────────────────────────
+class _VaiaLoadingIndicator extends StatefulWidget {
+  const _VaiaLoadingIndicator();
+
+  @override
+  State<_VaiaLoadingIndicator> createState() => _VaiaLoadingIndicatorState();
+}
+
+class _VaiaLoadingIndicatorState extends State<_VaiaLoadingIndicator>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _pulse;
+  late Animation<double> _spin;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+    _pulse = Tween<double>(
+      begin: 0.92,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _spin = Tween<double>(begin: 0, end: 1).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (_, child) {
+          return Transform.scale(
+            scale: _pulse.value,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Spinning arc ring
+                  Transform.rotate(
+                    angle: _spin.value * 2 * 3.14159265,
+                    child: CustomPaint(
+                      size: const Size(100, 100),
+                      painter: _ArcPainter(),
+                    ),
+                  ),
+                  // VAIA logo
+                  Image.asset(AppAssets.appIcon, width: 56, height: 56),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ArcPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 4;
+
+    // Faint full circle track
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..color = const Color(0xFF00E5CC).withAlpha(40)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5,
+    );
+
+    // Gradient spinning arc
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final paint = Paint()
+      ..shader = SweepGradient(
+        colors: [
+          Colors.transparent,
+          const Color(0xFF00E5CC).withAlpha(180),
+          const Color(0xFF00E5CC),
+        ],
+        stops: const [0.0, 0.7, 1.0],
+      ).createShader(rect)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(rect, -1.57, 5.0, false, paint);
+  }
+
+  @override
+  bool shouldRepaint(_ArcPainter _) => false;
 }

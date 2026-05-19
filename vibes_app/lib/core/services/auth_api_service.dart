@@ -70,7 +70,7 @@ class AuthApiService {
     required String email,
     required String password,
   }) async {
-    final uri = Uri.parse('$_baseUrl/api/v1/auth/register');
+    final uri = Uri.parse('$_baseUrl/api/v1/auth/signup');
     final requestBody = {'email': email, 'password': password};
 
     print('[AUTH] SIGNUP → $uri');
