@@ -5,6 +5,7 @@ import '../../../core/constants/app_text_styles.dart';
 import '../../../core/widgets/app_icon_badge.dart';
 import '../../../core/widgets/app_input_field.dart';
 import '../../../core/widgets/app_primary_button.dart';
+import 'read_passage_screen.dart';
 
 class UserInfoScreen extends StatefulWidget {
   const UserInfoScreen({super.key});
@@ -87,13 +88,14 @@ class _UserInfoScreenState extends State<UserInfoScreen>
     FocusScope.of(context).unfocus();
     if (!_validate()) return;
 
-    final payload = {
-      'firstName': _firstNameController.text.trim(),
-      'age': int.parse(_ageController.text.trim()),
-    };
-
-    // ignore: avoid_print
-    print('[UserInfoScreen] payload: $payload');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ReadPassageScreen(
+          firstName: _firstNameController.text.trim(),
+          age: int.parse(_ageController.text.trim()),
+        ),
+      ),
+    );
   }
 
   @override
