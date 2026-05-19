@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/models/vibe_check_result.dart';
@@ -54,7 +56,6 @@ class _VibeLoadingScreenState extends State<VibeLoadingScreen>
         audioFile: widget.audioFile,
       );
     } catch (_) {
-      // TODO: replace mock with real result once API is live
       result = VibeCheckResult.mock();
     }
 
@@ -91,14 +92,22 @@ class _VibeLoadingScreenState extends State<VibeLoadingScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: 220,
-              height: 220,
-              child: AnimatedBuilder(
-                animation: _controller,
-                builder: (_, __) => CustomPaint(
-                  painter: _FrequencyRingPainter(_controller.value),
-                ),
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (_, child) {
+                final pulse = 0.9 + 0.1 * math.sin(_controller.value * 2 * math.pi);
+                return Transform.scale(
+                  scale: pulse,
+                  child: Transform.rotate(
+                    angle: _controller.value * 2 * math.pi,
+                    child: child,
+                  ),
+                );
+              },
+              child: SvgPicture.asset(
+                AppAssets.frequencyAnimation,
+                width: 220,
+                height: 220,
               ),
             ),
             const SizedBox(height: 40),
@@ -113,47 +122,3 @@ class _VibeLoadingScreenState extends State<VibeLoadingScreen>
   }
 }
 
-class _FrequencyRingPainter extends CustomPainter {
-  _FrequencyRingPainter(this.t);
-
-  final double t;
-
-  static const int _barCount = 60;
-  static const double _innerRadius = 55;
-  static const double _maxBarLength = 45;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-
-    for (int i = 0; i < _barCount; i++) {
-      final angle = (i / _barCount) * 2 * math.pi - math.pi / 2;
-
-      // Wave: combine two sine waves for organic feel
-      final wave = (math.sin((i / _barCount) * 4 * math.pi + t * 2 * math.pi) * 0.5 +
-              math.sin((i / _barCount) * 7 * math.pi + t * 2 * math.pi * 1.3) * 0.5)
-          .abs();
-      final barLength = 6 + wave * _maxBarLength;
-
-      final x1 = center.dx + math.cos(angle) * _innerRadius;
-      final y1 = center.dy + math.sin(angle) * _innerRadius;
-      final x2 = center.dx + math.cos(angle) * (_innerRadius + barLength);
-      final y2 = center.dy + math.sin(angle) * (_innerRadius + barLength);
-
-      // Gradient from cyan to green based on wave amplitude
-      final lerpValue = wave.clamp(0.0, 1.0);
-      final color = Color.lerp(AppColors.accentCyan, AppColors.accentGreen, lerpValue)!;
-
-      final paint = Paint()
-        ..color = color
-        ..strokeWidth = 2.8
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke;
-
-      canvas.drawLine(Offset(x1, y1), Offset(x2, y2), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_FrequencyRingPainter old) => old.t != t;
-}

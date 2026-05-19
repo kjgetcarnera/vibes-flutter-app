@@ -6,4 +6,5 @@ class AppAssets {
   static const String splash = '$_base/spalsh.png';
   static const String appIcon = '$_base/VAIA.png';
   static const String recoderIcon = '$_base/recoder_icon.png';
+  static const String frequencyAnimation = '$_base/frequency_animation.svg';
 }

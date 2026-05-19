@@ -41,7 +41,10 @@ class _VibeResultScreenState extends State<VibeResultScreen>
       vsync: this,
       duration: const Duration(milliseconds: 800),
     )..forward();
-    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
+    );
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.05),
       end: Offset.zero,
@@ -117,36 +120,36 @@ class _VibeResultScreenState extends State<VibeResultScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Header
-                      Text(
-                        'Okay ${widget.firstName},\nHere\'s what I\'m hearing:',
-                        style: AppTextStyles.displayLarge,
+                          Text(
+                            'Okay ${widget.firstName},\nHere\'s what I\'m hearing:',
+                            style: AppTextStyles.displayLarge,
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Brain Readiness card
+                          _BrainReadinessCard(result: r),
+                          const SizedBox(height: 16),
+
+                          // Frequency Score card
+                          _FrequencyScoreCard(result: r),
+                          const SizedBox(height: 24),
+
+                          // Playback card
+                          _PlaybackCard(
+                            isPlaying: _playerState == PlayerState.playing,
+                            position: _position,
+                            duration: _duration,
+                            onTap: _togglePlayback,
+                            formatDuration: _formatDuration,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 24),
-
-                      // Brain Readiness card
-                      _BrainReadinessCard(result: r),
-                      const SizedBox(height: 16),
-
-                      // Frequency Score card
-                      _FrequencyScoreCard(result: r),
-                      const SizedBox(height: 24),
-
-                      // Playback card
-                      _PlaybackCard(
-                        isPlaying: _playerState == PlayerState.playing,
-                        position: _position,
-                        duration: _duration,
-                        onTap: _togglePlayback,
-                        formatDuration: _formatDuration,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
 
           // ── Sticky top nav bar ──
           Positioned(
@@ -180,7 +183,10 @@ class _VibeResultScreenState extends State<VibeResultScreen>
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: AppColors.knobCenter,
-                        border: Border.all(color: AppColors.knobOuter, width: 1),
+                        border: Border.all(
+                          color: AppColors.knobOuter,
+                          width: 1,
+                        ),
                       ),
                       child: const Icon(
                         Icons.chevron_left,
@@ -370,7 +376,9 @@ class _FrequencyScoreCard extends StatelessWidget {
                       children: [
                         Text(
                           '${result.frequencyHz.toInt()}',
-                          style: AppTextStyles.displayLarge.copyWith(fontSize: 36),
+                          style: AppTextStyles.displayLarge.copyWith(
+                            fontSize: 36,
+                          ),
                         ),
                         Text(
                           ' Hz',
@@ -392,7 +400,10 @@ class _FrequencyScoreCard extends StatelessWidget {
                 children: [
                   // Recovering badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF3A4A2A),
                       borderRadius: BorderRadius.circular(20),
@@ -418,11 +429,16 @@ class _FrequencyScoreCard extends StatelessWidget {
                     children: [
                       Text(
                         '${result.vibingWithYouCount}',
-                        style: AppTextStyles.displayLarge.copyWith(fontSize: 28),
+                        style: AppTextStyles.displayLarge.copyWith(
+                          fontSize: 28,
+                        ),
                       ),
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF1A3A2A),
                           borderRadius: BorderRadius.circular(20),
@@ -507,7 +523,9 @@ class _PlaybackCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               backgroundColor: AppColors.knobOuter,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accentCyan),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.accentCyan,
+              ),
               minHeight: 3,
             ),
           ),
@@ -560,9 +578,7 @@ class _IconBox extends StatelessWidget {
         color: AppColors.surfacePanel,
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Center(
-        child: Text(emoji, style: const TextStyle(fontSize: 20)),
-      ),
+      child: Center(child: Text(emoji, style: const TextStyle(fontSize: 20))),
     );
   }
 }
