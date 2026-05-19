@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -46,7 +48,10 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..forward();
-    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
+    );
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.06),
       end: Offset.zero,
@@ -67,7 +72,8 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
     if (!mounted || !status.isGranted) return;
 
     final dir = await getTemporaryDirectory();
-    final path = '${dir.path}/vibe_check_${DateTime.now().millisecondsSinceEpoch}.m4a';
+    final path =
+        '${dir.path}/vibe_check_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
     await _recorder.start(
       const RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 128000),
@@ -89,30 +95,44 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
     if (_isSubmitting) return;
     setState(() => _isSubmitting = true);
 
+    print('[VibeCheck] isRecording=$_isRecording isPaused=$_isPaused');
+
     final path = await _recorder.stop();
     setState(() => _isRecording = false);
 
+    print('[VibeCheck] recorded file path: $path');
+
     if (path == null) {
+      print(
+        '[VibeCheck] ERROR: path is null — recording never started or failed',
+      );
       _showError('Recording failed. Please try again.');
       setState(() => _isSubmitting = false);
       return;
     }
 
+    final file = File(path);
+    final fileSize = await file.exists() ? await file.length() : -1;
+    print(
+      '[VibeCheck] file exists: ${await file.exists()}, size: $fileSize bytes',
+    );
+    print(
+      '[VibeCheck] payload → firstName: ${widget.firstName}, age: ${widget.age}',
+    );
+
     try {
       await VibeApiService.submitVibeCheck(
         firstName: widget.firstName,
         age: widget.age,
-        audioFile: File(path),
+        audioFile: file,
       );
-      if (mounted) {
-        // TODO: navigate to next onboarding screen on success
-        Navigator.of(context).pop();
-      }
+      print('[VibeCheck] API success');
     } catch (e) {
-      if (mounted) {
-        _showError('Submission failed. Please try again.');
-        setState(() => _isSubmitting = false);
-      }
+      print('[VibeCheck] API ERROR (skipped for now): $e');
+    }
+
+    if (mounted) {
+      Navigator.of(context).pop();
     }
   }
 
@@ -208,7 +228,10 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: AppColors.knobCenter,
-                        border: Border.all(color: AppColors.knobOuter, width: 1),
+                        border: Border.all(
+                          color: AppColors.knobOuter,
+                          width: 1,
+                        ),
                       ),
                       child: const Icon(
                         Icons.chevron_left,
@@ -233,10 +256,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
               decoration: BoxDecoration(
                 color: AppColors.background,
                 border: Border(
-                  top: BorderSide(
-                    color: Colors.white.withAlpha(15),
-                    width: 1,
-                  ),
+                  top: BorderSide(color: Colors.white.withAlpha(15), width: 1),
                 ),
               ),
               child: _isSubmitting
@@ -283,7 +303,10 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: AppColors.knobCenter,
-                              border: Border.all(color: AppColors.knobOuter, width: 1),
+                              border: Border.all(
+                                color: AppColors.knobOuter,
+                                width: 1,
+                              ),
                             ),
                             child: Icon(
                               _isPaused ? Icons.play_arrow : Icons.pause,
@@ -309,7 +332,9 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                             ),
                             child: Icon(
                               Icons.check,
-                              color: _isRecording ? Colors.black : AppColors.textMuted,
+                              color: _isRecording
+                                  ? Colors.black
+                                  : AppColors.textMuted,
                               size: 20,
                             ),
                           ),
