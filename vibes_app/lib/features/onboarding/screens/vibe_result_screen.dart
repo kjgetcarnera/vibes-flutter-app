@@ -461,7 +461,7 @@ class _FrequencyScoreCard extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      'Band: ${result.frequencyBandMin.toInt()}–${result.frequencyBandMax.toInt()} Hz',
+                      'Tag: ${result.frequencyTag.toUpperCase()}',
                       style: AppTextStyles.caption,
                     ),
                   ],
@@ -497,39 +497,17 @@ class _FrequencyScoreCard extends StatelessWidget {
                     textAlign: TextAlign.right,
                   ),
                   const SizedBox(height: 24),
-                  Text('Vibing With You', style: AppTextStyles.caption),
+                  Text('Recommendation', style: AppTextStyles.caption),
                   const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Text(
-                        '${result.vibingWithYouCount}',
-                        style: AppTextStyles.displayLarge.copyWith(
-                          fontSize: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1A3A2A),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'nearby',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.accentGreen,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    '${result.vibingActiveInBand} active in your band',
-                    style: AppTextStyles.caption,
+                  SizedBox(
+                    width: 140,
+                    child: Text(
+                      result.frequencyRecommendation,
+                      style: AppTextStyles.bodyMono.copyWith(fontSize: 10),
+                      textAlign: TextAlign.right,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),

@@ -11,10 +11,12 @@ class AuthSession {
   String? _accessToken;
   int? _userId;
   String? _onboardingStatus;
+  String? _lastSessionId;
 
   String? get accessToken => _accessToken;
   int? get userId => _userId;
   String? get onboardingStatus => _onboardingStatus;
+  String? get lastSessionId => _lastSessionId;
   bool get isLoggedIn => _accessToken != null;
 
   String get authHeader => 'Bearer $_accessToken';
@@ -42,10 +44,15 @@ class AuthSession {
     await prefs.setString(_keyOnboarding, onboardingStatus);
   }
 
+  void saveSessionId(String sessionId) {
+    _lastSessionId = sessionId;
+  }
+
   Future<void> clear() async {
     _accessToken = null;
     _userId = null;
     _onboardingStatus = null;
+    _lastSessionId = null;
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyToken);

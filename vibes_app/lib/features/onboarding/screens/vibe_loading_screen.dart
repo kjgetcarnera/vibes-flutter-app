@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -50,12 +51,11 @@ class _VibeLoadingScreenState extends State<VibeLoadingScreen>
   Future<void> _submit() async {
     VibeCheckResult result;
     try {
-      result = await VibeApiService.submitVibeCheck(
-        firstName: widget.firstName,
-        age: widget.age,
+      result = await VibeApiService.submitPreScore(
         audioFile: widget.audioFile,
       );
-    } catch (_) {
+    } catch (e) {
+      print('[VibeLoading] API error, using mock: $e');
       result = VibeCheckResult.mock();
     }
 
