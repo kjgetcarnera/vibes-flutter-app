@@ -297,47 +297,44 @@ class _BrainReadinessCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Title row
           Row(
             children: [
               _IconBox(emoji: '🧠'),
               const SizedBox(width: 12),
-              Text('Brain Readiness', style: AppTextStyles.headingBold),
+              Text('Brain Readiness', style: _kCardTitle),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
 
+          // Score + state row
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Score
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          result.brainReadinessScore.toStringAsFixed(1),
-                          style: AppTextStyles.displayLarge.copyWith(
-                            fontSize: 48,
-                            fontWeight: FontWeight.w700,
-                            color: scoreColor,
-                          ),
-                        ),
-                        Text(
-                          ' /100',
-                          style: AppTextStyles.bodyMono
-                              .copyWith(color: AppColors.textMuted),
-                        ),
-                      ],
-                    ),
-                    Text('Just Now', style: AppTextStyles.caption),
-                  ],
-                ),
+              // Left — big score
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        result.brainReadinessScore.toStringAsFixed(1),
+                        style: _kBigNumber.copyWith(color: scoreColor),
+                      ),
+                      const SizedBox(width: 4),
+                      Text('/100', style: _kMuted),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text('Just Now', style: _kCaption),
+                ],
               ),
-              // State pill
+
+              const Spacer(),
+
+              // Right — state info
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -345,49 +342,45 @@ class _BrainReadinessCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 10,
-                        height: 10,
+                        width: 12,
+                        height: 12,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: scoreColor,
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 7),
                       Text(
                         _formatState(result.brainState),
-                        style: AppTextStyles.headingBold.copyWith(fontSize: 13),
+                        style: _kStateName,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 5),
                   Text(
                     result.brainStateSubtitle,
-                    style: AppTextStyles.bodyMono.copyWith(
-                      color: scoreColor,
-                      fontSize: 11,
-                    ),
+                    style: _kMonoSm.copyWith(color: scoreColor),
                     textAlign: TextAlign.right,
                   ),
-                  const SizedBox(height: 2),
-                  Text('Your Brain State', style: AppTextStyles.caption),
+                  const SizedBox(height: 3),
+                  Text('Your Brain State', style: _kCaption),
                 ],
               ),
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           Divider(color: Colors.white.withAlpha(20), height: 1),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
-          Text(result.brainStateDescription, style: AppTextStyles.bodyMono),
-          const SizedBox(height: 10),
-          Text(
-            result.brainReadinessRecommendation,
-            style: AppTextStyles.bodyMono.copyWith(
-              color: scoreColor.withAlpha(200),
-              fontSize: 11,
+          Text(result.brainStateDescription, style: _kBody),
+          if (result.brainReadinessRecommendation.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              result.brainReadinessRecommendation,
+              style: _kMonoSm.copyWith(color: scoreColor.withAlpha(180)),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -403,11 +396,11 @@ class _FrequencyScoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor =
+    final c1 =
         _parseColor(result.frequencyColors.firstOrNull) ?? AppColors.accentCyan;
-    final secondaryColor = result.frequencyColors.length > 1
-        ? (_parseColor(result.frequencyColors[1]) ?? primaryColor)
-        : primaryColor;
+    final c2 = result.frequencyColors.length > 1
+        ? (_parseColor(result.frequencyColors[1]) ?? c1)
+        : c1;
 
     return _Card(
       child: Column(
@@ -418,130 +411,214 @@ class _FrequencyScoreCard extends StatelessWidget {
             children: [
               _IconBox(emoji: '📡'),
               const SizedBox(width: 12),
-              Text('Frequency Score', style: AppTextStyles.headingBold),
-              const Spacer(),
-              // State badge
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                decoration: BoxDecoration(
-                  color: primaryColor.withAlpha(30),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: primaryColor.withAlpha(80)),
-                ),
-                child: Text(
-                  _formatState(result.frequencyLabel),
-                  style: AppTextStyles.caption.copyWith(
-                    color: primaryColor,
-                    letterSpacing: 0.4,
-                  ),
-                ),
-              ),
+              Text('Frequency Score', style: _kCardTitle),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
 
-          // Score row
+          // Score row — matches Figma: score left, badge + CTA right
           Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
-                  colors: [primaryColor, secondaryColor],
-                ).createShader(bounds),
-                child: Text(
-                  result.frequencyScore.toStringAsFixed(1),
-                  style: AppTextStyles.displayLarge.copyWith(
-                    fontSize: 52,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
+              // Left column
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        ShaderMask(
+                          shaderCallback: (b) => LinearGradient(
+                            colors: [c1, c2],
+                          ).createShader(b),
+                          child: Text(
+                            result.frequencyScore.toStringAsFixed(1),
+                            style: _kBigNumber.copyWith(color: Colors.white),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text('/100', style: _kMuted),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text('Just Now', style: _kCaption),
+                  ],
                 ),
               ),
-              Text(
-                ' /100',
-                style:
-                    AppTextStyles.bodyMono.copyWith(color: AppColors.textMuted),
-              ),
-            ],
-          ),
-          Text('Just Now', style: AppTextStyles.caption),
 
-          const SizedBox(height: 16),
-          Divider(color: Colors.white.withAlpha(20), height: 1),
-          const SizedBox(height: 14),
-
-          // Hz + Tag row
-          Row(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
+              // Right column — badge + CTA
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    result.frequencyHz.toStringAsFixed(1),
-                    style: AppTextStyles.displayLarge.copyWith(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: c1.withAlpha(40),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: c1.withAlpha(100)),
+                    ),
+                    child: Text(
+                      _formatState(result.frequencyLabel),
+                      style: _kCaption.copyWith(color: c1, letterSpacing: 0.3),
                     ),
                   ),
-                  Text(
-                    ' Hz',
-                    style:
-                        AppTextStyles.bodyMono.copyWith(fontSize: 13),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: 130,
+                    child: Text(
+                      '${result.frequencyCta} →→',
+                      style: _kMonoSm,
+                      textAlign: TextAlign.right,
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(width: 12),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: secondaryColor.withAlpha(30),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: secondaryColor.withAlpha(80)),
-                ),
-                child: Text(
-                  result.frequencyTag.toUpperCase(),
-                  style: AppTextStyles.caption.copyWith(
-                    color: secondaryColor,
-                    letterSpacing: 0.6,
-                  ),
-                ),
-              ),
             ],
           ),
 
+          const SizedBox(height: 18),
+          Divider(color: Colors.white.withAlpha(20), height: 1),
           const SizedBox(height: 14),
 
-          // Meaning
-          Text(result.frequencyMeaning, style: AppTextStyles.bodyMono),
-          const SizedBox(height: 10),
+          // Hz row — left: Hz big, right: meaning + recommendation
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left — Hz
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        result.frequencyHz.toStringAsFixed(1),
+                        style: _kHzNumber,
+                      ),
+                      const SizedBox(width: 4),
+                      Text('Hz', style: _kBody),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: c2.withAlpha(30),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: c2.withAlpha(70)),
+                    ),
+                    child: Text(
+                      result.frequencyTag.toUpperCase(),
+                      style: _kCaption.copyWith(
+                          color: c2, letterSpacing: 0.6),
+                    ),
+                  ),
+                ],
+              ),
 
-          // CTA
-          Text(
-            result.frequencyCta,
-            style: AppTextStyles.bodyMono.copyWith(
-              color: primaryColor.withAlpha(200),
-              fontSize: 11,
-            ),
-          ),
-          const SizedBox(height: 6),
+              const SizedBox(width: 16),
 
-          // Recommendation
-          Text(
-            result.frequencyRecommendation,
-            style: AppTextStyles.bodyMono.copyWith(
-              color: AppColors.textMuted,
-              fontSize: 11,
-            ),
+              // Right — meaning + recommendation
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      result.frequencyMeaning,
+                      style: _kMonoSm,
+                      textAlign: TextAlign.right,
+                    ),
+                    if (result.frequencyRecommendation.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        result.frequencyRecommendation,
+                        style: _kMonoSm.copyWith(
+                            color: AppColors.textMuted),
+                        textAlign: TextAlign.right,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────
+// Card-local text styles  (Kamerik105 for numbers/titles, SpaceMono for body)
+// ─────────────────────────────────────────────────────────────
+const _kBigNumber = TextStyle(
+  fontFamily: 'Kamerik105',
+  fontSize: 52,
+  fontWeight: FontWeight.w700,
+  color: Color(0xFFFFFEFE),
+  letterSpacing: -1,
+);
+
+const _kHzNumber = TextStyle(
+  fontFamily: 'Kamerik105',
+  fontSize: 36,
+  fontWeight: FontWeight.w700,
+  color: Color(0xFFFFFEFE),
+  letterSpacing: -0.5,
+);
+
+const _kCardTitle = TextStyle(
+  fontFamily: 'Kamerik105',
+  fontSize: 18,
+  fontWeight: FontWeight.w700,
+  color: Color(0xFFFFFEFE),
+  letterSpacing: -0.3,
+);
+
+const _kStateName = TextStyle(
+  fontFamily: 'Kamerik105',
+  fontSize: 14,
+  fontWeight: FontWeight.w600,
+  color: Color(0xFFFFFEFE),
+  letterSpacing: -0.2,
+);
+
+// SpaceMono body/caption styles (PP Supply Mono substitute)
+const _kBody = TextStyle(
+  fontFamily: 'SpaceMono',
+  fontSize: 12,
+  fontWeight: FontWeight.w400,
+  color: Color(0xB3FFFEFE),
+  height: 1.5,
+);
+
+const _kMonoSm = TextStyle(
+  fontFamily: 'SpaceMono',
+  fontSize: 11,
+  fontWeight: FontWeight.w400,
+  color: Color(0xB3FFFEFE),
+  height: 1.4,
+);
+
+const _kCaption = TextStyle(
+  fontFamily: 'SpaceMono',
+  fontSize: 10,
+  fontWeight: FontWeight.w400,
+  color: Color(0x80FFFEFE),
+  letterSpacing: 0.6,
+);
+
+const _kMuted = TextStyle(
+  fontFamily: 'SpaceMono',
+  fontSize: 13,
+  fontWeight: FontWeight.w400,
+  color: Color(0x66FFFEFE),
+);
 
 // ─────────────────────────────────────────────────────────────
 // Playback Card
