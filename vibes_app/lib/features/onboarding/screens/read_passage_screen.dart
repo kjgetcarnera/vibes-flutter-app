@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -31,10 +32,11 @@ class ReadPassageScreen extends StatefulWidget {
 }
 
 class _ReadPassageScreenState extends State<ReadPassageScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  late AnimationController _waveController;
 
   final AudioRecorder _recorder = AudioRecorder();
   bool _isRecording = false;
@@ -57,12 +59,18 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
 
+    _waveController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3000),
+    )..repeat();
+
     _startRecording();
   }
 
   @override
   void dispose() {
     _fadeController.dispose();
+    _waveController.dispose();
     _recorder.dispose();
     super.dispose();
   }
@@ -143,8 +151,10 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
     );
 
     final mq = MediaQuery.of(context);
+    final screenH = mq.size.height;
     final topPad = mq.padding.top;
     final bottomPad = mq.padding.bottom;
+    final bottomBarH = screenH * 0.30;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -162,7 +172,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                   top: topPad + 72,
                   left: 24,
                   right: 24,
-                  bottom: bottomPad + 120,
+                  bottom: bottomBarH + 16,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -234,100 +244,181 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
             bottom: 0,
             left: 0,
             right: 0,
+            height: bottomBarH,
             child: Container(
-              padding: EdgeInsets.fromLTRB(24, 16, 24, bottomPad + 20),
               decoration: BoxDecoration(
                 color: AppColors.background,
                 border: Border(
                   top: BorderSide(color: Colors.white.withAlpha(15), width: 1),
                 ),
               ),
-              child: _isSubmitting
-                  ? const Center(
-                      child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.accentCyan,
-                        ),
-                      ),
-                    )
-                  : Row(
-                      children: [
-                        // Recording indicator dot
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 400),
-                          width: 10,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _isRecording && !_isPaused
-                                ? const Color(0xFFFF2D87)
-                                : AppColors.textMuted,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            _isRecording
-                                ? (_isPaused ? 'Paused' : 'Recording...')
-                                : 'Starting mic...',
-                            style: AppTextStyles.bodyMono,
-                          ),
-                        ),
-                        // Pause / Resume
-                        GestureDetector(
-                          onTap: _isRecording ? _togglePause : null,
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            margin: const EdgeInsets.only(right: 12),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.knobCenter,
-                              border: Border.all(
-                                color: AppColors.knobOuter,
-                                width: 1,
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  // ── Controls row ──
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(24, 20, 24, 8),
+                    child: _isSubmitting
+                        ? const Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.accentCyan,
                               ),
                             ),
-                            child: Icon(
-                              _isPaused ? Icons.play_arrow : Icons.pause,
-                              color: _isRecording
-                                  ? AppColors.textPrimary
-                                  : AppColors.textMuted,
-                              size: 20,
-                            ),
+                          )
+                        : Row(
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 400),
+                                width: 10,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _isRecording && !_isPaused
+                                      ? const Color(0xFFFF2D87)
+                                      : AppColors.textMuted,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  _isRecording
+                                      ? (_isPaused ? 'Paused' : 'Recording...')
+                                      : 'Starting mic...',
+                                  style: AppTextStyles.bodyMono,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: _isRecording ? _togglePause : null,
+                                child: Container(
+                                  width: 44,
+                                  height: 44,
+                                  margin: const EdgeInsets.only(right: 12),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: AppColors.knobCenter,
+                                    border: Border.all(
+                                      color: AppColors.knobOuter,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    _isPaused ? Icons.play_arrow : Icons.pause,
+                                    color: _isRecording
+                                        ? AppColors.textPrimary
+                                        : AppColors.textMuted,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: _isRecording ? _stopAndSubmit : null,
+                                child: Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: _isRecording
+                                        ? AppColors.accentGradient
+                                        : null,
+                                    color: _isRecording
+                                        ? null
+                                        : AppColors.knobCenter,
+                                  ),
+                                  child: Icon(
+                                    Icons.check,
+                                    color: _isRecording
+                                        ? Colors.black
+                                        : AppColors.textMuted,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        // Submit / Done
-                        GestureDetector(
-                          onTap: _isRecording ? _stopAndSubmit : null,
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: _isRecording
-                                  ? AppColors.accentGradient
-                                  : null,
-                              color: _isRecording ? null : AppColors.knobCenter,
-                            ),
-                            child: Icon(
-                              Icons.check,
-                              color: _isRecording
-                                  ? Colors.black
-                                  : AppColors.textMuted,
-                              size: 20,
-                            ),
+                  ),
+                  // ── Voice wave animation ──
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPad),
+                      child: AnimatedBuilder(
+                        animation: _waveController,
+                        builder: (_, __) => CustomPaint(
+                          painter: _VoiceWavePainter(
+                            progress: _waveController.value,
+                            active: _isRecording && !_isPaused,
                           ),
+                          child: const SizedBox.expand(),
                         ),
-                      ],
+                      ),
                     ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+class _VoiceWavePainter extends CustomPainter {
+  _VoiceWavePainter({required this.progress, required this.active});
+
+  final double progress;
+  final bool active;
+
+  static const int _barCount = 40;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Bar width and gap are derived from canvas width so they fill edge-to-edge
+    const double barFraction = 0.55; // bar takes 55% of each slot
+    final slotW = size.width / _barCount;
+    final barW = slotW * barFraction;
+
+    final centerY = size.height / 2;
+    final maxH = size.height * 0.80;
+    final minH = size.height * 0.06;
+
+    final paint = Paint()..style = PaintingStyle.fill;
+
+    for (int i = 0; i < _barCount; i++) {
+      final phase = (i / _barCount) * math.pi * 2;
+      double barH;
+      if (active) {
+        // Primary wave + secondary harmonic for organic feel
+        final wave = math.sin(progress * math.pi * 2 + phase);
+        final wave2 = math.sin(progress * math.pi * 4 + phase * 1.5) * 0.4;
+        barH =
+            minH + (maxH - minH) * ((wave + wave2 + 1.4) / 2.8).clamp(0.0, 1.0);
+      } else {
+        barH = minH;
+      }
+
+      // Gradient colour: cyan at peaks, mint at troughs
+      final t = ((barH - minH) / (maxH - minH)).clamp(0.0, 1.0);
+      final color = Color.lerp(
+        const Color(0xFF00E5CC).withAlpha(80),
+        const Color(0xFF00E5CC),
+        t,
+      )!;
+      paint.color = color;
+
+      final x = i * slotW + (slotW - barW) / 2;
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(x, centerY - barH / 2, barW, barH),
+        const Radius.circular(6),
+      );
+      canvas.drawRRect(rect, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_VoiceWavePainter old) =>
+      old.progress != progress || old.active != active;
 }
