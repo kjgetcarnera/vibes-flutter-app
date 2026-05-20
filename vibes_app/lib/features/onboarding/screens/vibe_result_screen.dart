@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/models/vibe_check_result.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/widgets/app_icon_badge.dart';
@@ -117,19 +118,19 @@ class _VibeResultScreenState extends State<VibeResultScreen>
     );
   }
 
-  Future<void> _togglePlayback() async {
-    if (_playerState == PlayerState.playing) {
-      await _player.pause();
-    } else {
-      await _player.play(DeviceFileSource(widget.audioFile.path));
-    }
-  }
+  // Future<void> _togglePlayback() async {
+  //   if (_playerState == PlayerState.playing) {
+  //     await _player.pause();
+  //   } else {
+  //     await _player.play(DeviceFileSource(widget.audioFile.path));
+  //   }
+  // }
 
-  String _formatDuration(Duration d) {
-    final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
+  // String _formatDuration(Duration d) {
+  //   final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+  //   final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+  //   return '$m:$s';
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -184,14 +185,14 @@ class _VibeResultScreenState extends State<VibeResultScreen>
                           const SizedBox(height: 24),
 
                           // Playback card
-                          _PlaybackCard(
-                            isPlaying: _playerState == PlayerState.playing,
-                            position: _position,
-                            duration: _duration,
-                            onTap: _togglePlayback,
-                            formatDuration: _formatDuration,
-                          ),
-                          const SizedBox(height: 32),
+                          // _PlaybackCard(
+                          //   isPlaying: _playerState == PlayerState.playing,
+                          //   position: _position,
+                          //   duration: _duration,
+                          //   onTap: _togglePlayback,
+                          //   formatDuration: _formatDuration,
+                          // ),
+                          // const SizedBox(height: 32),
 
                           // Logout
                           GestureDetector(
@@ -290,7 +291,8 @@ class _BrainReadinessCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scoreColor = _parseColor(result.brainReadinessColors.firstOrNull) ??
+    final scoreColor =
+        _parseColor(result.brainReadinessColors.firstOrNull) ??
         const Color(0xFFFFA500);
 
     return _Card(
@@ -300,7 +302,7 @@ class _BrainReadinessCard extends StatelessWidget {
           // Title row
           Row(
             children: [
-              _IconBox(emoji: '🧠'),
+              _IconBox(assetPath: AppAssets.brainReadiness),
               const SizedBox(width: 12),
               Text('Brain Readiness', style: _kCardTitle),
             ],
@@ -350,10 +352,7 @@ class _BrainReadinessCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 7),
-                      Text(
-                        _formatState(result.brainState),
-                        style: _kStateName,
-                      ),
+                      Text(_formatState(result.brainState), style: _kStateName),
                     ],
                   ),
                   const SizedBox(height: 5),
@@ -409,7 +408,7 @@ class _FrequencyScoreCard extends StatelessWidget {
           // Title row
           Row(
             children: [
-              _IconBox(emoji: '📡'),
+              _IconBox(assetPath: AppAssets.frequencyScore),
               const SizedBox(width: 12),
               Text('Frequency Score', style: _kCardTitle),
             ],
@@ -430,9 +429,8 @@ class _FrequencyScoreCard extends StatelessWidget {
                       textBaseline: TextBaseline.alphabetic,
                       children: [
                         ShaderMask(
-                          shaderCallback: (b) => LinearGradient(
-                            colors: [c1, c2],
-                          ).createShader(b),
+                          shaderCallback: (b) =>
+                              LinearGradient(colors: [c1, c2]).createShader(b),
                           child: Text(
                             result.frequencyScore.toStringAsFixed(1),
                             style: _kBigNumber.copyWith(color: Colors.white),
@@ -454,7 +452,9 @@ class _FrequencyScoreCard extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 5),
+                      horizontal: 12,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: c1.withAlpha(40),
                       borderRadius: BorderRadius.circular(20),
@@ -495,9 +495,13 @@ class _FrequencyScoreCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
-                      Text(
-                        result.frequencyHz.toStringAsFixed(1),
-                        style: _kHzNumber,
+                      ShaderMask(
+                        shaderCallback: (b) =>
+                            LinearGradient(colors: [c1, c2]).createShader(b),
+                        child: Text(
+                          result.frequencyHz.toStringAsFixed(1),
+                          style: _kHzNumber.copyWith(color: Colors.white),
+                        ),
                       ),
                       const SizedBox(width: 4),
                       Text('Hz', style: _kBody),
@@ -506,7 +510,9 @@ class _FrequencyScoreCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: c2.withAlpha(30),
                       borderRadius: BorderRadius.circular(10),
@@ -514,8 +520,7 @@ class _FrequencyScoreCard extends StatelessWidget {
                     ),
                     child: Text(
                       result.frequencyTag.toUpperCase(),
-                      style: _kCaption.copyWith(
-                          color: c2, letterSpacing: 0.6),
+                      style: _kCaption.copyWith(color: c2, letterSpacing: 0.6),
                     ),
                   ),
                 ],
@@ -537,8 +542,7 @@ class _FrequencyScoreCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text(
                         result.frequencyRecommendation,
-                        style: _kMonoSm.copyWith(
-                            color: AppColors.textMuted),
+                        style: _kMonoSm.copyWith(color: AppColors.textMuted),
                         textAlign: TextAlign.right,
                       ),
                     ],
@@ -558,7 +562,7 @@ class _FrequencyScoreCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────
 const _kBigNumber = TextStyle(
   fontFamily: 'Kamerik105',
-  fontSize: 52,
+  fontSize: 50,
   fontWeight: FontWeight.w700,
   color: Color(0xFFFFFEFE),
   letterSpacing: -1,
@@ -574,7 +578,7 @@ const _kHzNumber = TextStyle(
 
 const _kCardTitle = TextStyle(
   fontFamily: 'Kamerik105',
-  fontSize: 18,
+  fontSize: 20,
   fontWeight: FontWeight.w700,
   color: Color(0xFFFFFEFE),
   letterSpacing: -0.3,
@@ -588,9 +592,8 @@ const _kStateName = TextStyle(
   letterSpacing: -0.2,
 );
 
-// SpaceMono body/caption styles (PP Supply Mono substitute)
 const _kBody = TextStyle(
-  fontFamily: 'SpaceMono',
+  fontFamily: 'PPSupplyMono',
   fontSize: 12,
   fontWeight: FontWeight.w400,
   color: Color(0xB3FFFEFE),
@@ -598,103 +601,103 @@ const _kBody = TextStyle(
 );
 
 const _kMonoSm = TextStyle(
-  fontFamily: 'SpaceMono',
+  fontFamily: 'PPSupplyMono',
   fontSize: 11,
-  fontWeight: FontWeight.w400,
-  color: Color(0xB3FFFEFE),
+  fontWeight: FontWeight.w500,
+  color: Color(0xFFFFFEFE),
   height: 1.4,
 );
 
 const _kCaption = TextStyle(
-  fontFamily: 'SpaceMono',
+  fontFamily: 'PPSupplyMono',
   fontSize: 10,
-  fontWeight: FontWeight.w400,
-  color: Color(0x80FFFEFE),
+  fontWeight: FontWeight.w500,
+  color: Color(0x80939AA6),
   letterSpacing: 0.6,
 );
 
 const _kMuted = TextStyle(
-  fontFamily: 'SpaceMono',
-  fontSize: 13,
+  fontFamily: 'PPSupplyMono',
+  fontSize: 14,
   fontWeight: FontWeight.w400,
-  color: Color(0x66FFFEFE),
+  color: Color(0x668E8E93),
 );
 
 // ─────────────────────────────────────────────────────────────
 // Playback Card
 // ─────────────────────────────────────────────────────────────
-class _PlaybackCard extends StatelessWidget {
-  const _PlaybackCard({
-    required this.isPlaying,
-    required this.position,
-    required this.duration,
-    required this.onTap,
-    required this.formatDuration,
-  });
+// class _PlaybackCard extends StatelessWidget {
+//   const _PlaybackCard({
+//     required this.isPlaying,
+//     required this.position,
+//     required this.duration,
+//     required this.onTap,
+//     required this.formatDuration,
+//   });
 
-  final bool isPlaying;
-  final Duration position;
-  final Duration duration;
-  final VoidCallback onTap;
-  final String Function(Duration) formatDuration;
+//   final bool isPlaying;
+//   final Duration position;
+//   final Duration duration;
+//   final VoidCallback onTap;
+//   final String Function(Duration) formatDuration;
 
-  @override
-  Widget build(BuildContext context) {
-    final progress = duration.inMilliseconds > 0
-        ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
-        : 0.0;
+//   @override
+//   Widget build(BuildContext context) {
+//     final progress = duration.inMilliseconds > 0
+//         ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
+//         : 0.0;
 
-    return _Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text('Your Recording', style: AppTextStyles.headingBold),
-              const Spacer(),
-              GestureDetector(
-                onTap: onTap,
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: AppColors.accentGradient,
-                  ),
-                  child: Icon(
-                    isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.black,
-                    size: 22,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: AppColors.knobOuter,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                AppColors.accentCyan,
-              ),
-              minHeight: 3,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(formatDuration(position), style: AppTextStyles.caption),
-              Text(formatDuration(duration), style: AppTextStyles.caption),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
+//     return _Card(
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Row(
+//             children: [
+//               Text('Your Recording', style: AppTextStyles.headingBold),
+//               const Spacer(),
+//               GestureDetector(
+//                 onTap: onTap,
+//                 child: Container(
+//                   width: 44,
+//                   height: 44,
+//                   decoration: BoxDecoration(
+//                     shape: BoxShape.circle,
+//                     gradient: AppColors.accentGradient,
+//                   ),
+//                   child: Icon(
+//                     isPlaying ? Icons.pause : Icons.play_arrow,
+//                     color: Colors.black,
+//                     size: 22,
+//                   ),
+//                 ),
+//               ),
+//             ],
+//           ),
+//           const SizedBox(height: 14),
+//           ClipRRect(
+//             borderRadius: BorderRadius.circular(4),
+//             child: LinearProgressIndicator(
+//               value: progress,
+//               backgroundColor: AppColors.knobOuter,
+//               valueColor: const AlwaysStoppedAnimation<Color>(
+//                 AppColors.accentCyan,
+//               ),
+//               minHeight: 3,
+//             ),
+//           ),
+//           const SizedBox(height: 8),
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               Text(formatDuration(position), style: AppTextStyles.caption),
+//               Text(formatDuration(duration), style: AppTextStyles.caption),
+//             ],
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
 // ─────────────────────────────────────────────────────────────
 // Shared helpers
@@ -709,8 +712,8 @@ class _Card extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.knobCenter,
-        borderRadius: BorderRadius.circular(20),
+        color: const Color(0x332C2C2E), // rgba(44,44,46,0.20)
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.white.withAlpha(15), width: 1),
       ),
       child: child,
@@ -719,19 +722,18 @@ class _Card extends StatelessWidget {
 }
 
 class _IconBox extends StatelessWidget {
-  const _IconBox({required this.emoji});
-  final String emoji;
+  const _IconBox({required this.assetPath});
+  final String assetPath;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 40,
       height: 40,
-      decoration: BoxDecoration(
-        color: AppColors.surfacePanel,
+      child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
+        child: Image.asset(assetPath, width: 40, height: 40, fit: BoxFit.cover),
       ),
-      child: Center(child: Text(emoji, style: const TextStyle(fontSize: 20))),
     );
   }
 }
@@ -762,6 +764,10 @@ String _formatState(String state) {
       .replaceAll('_', ' ')
       .replaceAll('-', ' ')
       .split(' ')
-      .map((w) => w.isEmpty ? w : '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}')
+      .map(
+        (w) => w.isEmpty
+            ? w
+            : '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}',
+      )
       .join(' ');
 }
