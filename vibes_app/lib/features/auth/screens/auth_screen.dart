@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/services/auth_api_service.dart';
+import '../../../core/widgets/app_auth_field.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../onboarding/screens/user_info_screen.dart';
 
@@ -331,7 +332,7 @@ class _AuthPanel extends StatelessWidget {
             child: Column(
               children: [
                 // Email
-                _AuthField(
+                AppAuthField(
                   hint: 'Email address',
                   prefixIcon: Icons.mail_outline,
                   controller: emailController,
@@ -342,7 +343,7 @@ class _AuthPanel extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // Password
-                _AuthField(
+                AppAuthField(
                   hint: 'Password',
                   prefixIcon: Icons.lock_outline,
                   controller: passwordController,
@@ -364,7 +365,7 @@ class _AuthPanel extends StatelessWidget {
                 // Confirm Password (sign up only)
                 if (isSignUp) ...[
                   const SizedBox(height: 20),
-                  _AuthField(
+                  AppAuthField(
                     hint: 'Confirm Password',
                     prefixIcon: Icons.lock_outline,
                     controller: confirmPasswordController,
@@ -486,92 +487,6 @@ class _Tab extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// Auth field
-// ─────────────────────────────────────────────────────────────
-class _AuthField extends StatelessWidget {
-  const _AuthField({
-    required this.hint,
-    required this.prefixIcon,
-    required this.controller,
-    this.obscure = false,
-    this.keyboardType = TextInputType.text,
-    this.error,
-    this.suffix,
-    this.onChanged,
-  });
-
-  final String hint;
-  final IconData prefixIcon;
-  final TextEditingController controller;
-  final bool obscure;
-  final TextInputType keyboardType;
-  final String? error;
-  final Widget? suffix;
-  final ValueChanged<String>? onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final hasError = error != null;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.knobCenter,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: hasError
-                  ? Colors.redAccent.withAlpha(180)
-                  : AppColors.knobOuter,
-              width: 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              const SizedBox(width: 16),
-              Icon(prefixIcon, color: AppColors.textSecondary, size: 18),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  obscureText: obscure,
-                  keyboardType: keyboardType,
-                  onChanged: onChanged,
-                  style: AppTextStyles.kamerikInput.copyWith(
-                    color: const Color(0xFFFFFEFE),
-                  ),
-                  cursorColor: AppColors.accentCyan,
-                  decoration: InputDecoration(
-                    hintText: hint,
-                    hintStyle: AppTextStyles.kamerikInput,
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                ),
-              ),
-              if (suffix != null) ...[suffix!, const SizedBox(width: 14)],
-            ],
-          ),
-        ),
-        if (hasError) ...[
-          const SizedBox(height: 5),
-          Padding(
-            padding: const EdgeInsets.only(left: 4),
-            child: Text(
-              error!,
-              style: AppTextStyles.caption.copyWith(
-                color: Colors.redAccent,
-                letterSpacing: 0.3,
-              ),
-            ),
-          ),
-        ],
-      ],
     );
   }
 }

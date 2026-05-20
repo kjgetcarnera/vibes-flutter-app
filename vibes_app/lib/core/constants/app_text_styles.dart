@@ -59,11 +59,10 @@ class AppTextStyles {
     letterSpacing: -0.36,
   );
 
-  static const TextStyle kamerikInput = TextStyle(
-    fontFamily: 'Kamerik105',
+  static TextStyle get kamerikInput => GoogleFonts.inter(
     fontSize: 14,
     fontWeight: FontWeight.w400,
-    color: Color(0x80FFFEFE),
+    color: const Color(0x80FFFEFE),
     height: 19 / 14,
     letterSpacing: -0.15,
   );

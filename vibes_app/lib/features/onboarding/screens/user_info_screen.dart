@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/widgets/app_auth_field.dart';
 import '../../../core/widgets/app_icon_badge.dart';
-import '../../../core/widgets/app_input_field.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import 'read_passage_screen.dart';
 
@@ -28,6 +28,12 @@ class _UserInfoScreenState extends State<UserInfoScreen>
   String? _firstNameError;
   String? _ageError;
 
+  bool get _isFormValid {
+    final name = _firstNameController.text.trim();
+    final age = int.tryParse(_ageController.text.trim());
+    return name.length >= 2 && age != null && age >= 1 && age <= 120;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +49,8 @@ class _UserInfoScreenState extends State<UserInfoScreen>
       begin: const Offset(0, 0.06),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+    _firstNameController.addListener(() => setState(() {}));
+    _ageController.addListener(() => setState(() {}));
   }
 
   @override
@@ -149,29 +157,27 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                           style: AppTextStyles.bodyMono,
                         ),
                         const SizedBox(height: 30),
-                        AppInputField(
-                          label: 'FIRST NAME',
+                        AppAuthField(
+                          hint: 'Your name',
+                          prefixIcon: Icons.person_outline,
                           controller: _firstNameController,
                           focusNode: _firstNameFocus,
                           error: _firstNameError,
-                          hintText: 'Your name',
                           keyboardType: TextInputType.name,
                           textCapitalization: TextCapitalization.words,
                           textInputAction: TextInputAction.next,
                           onChanged: (_) {
-                            if (_firstNameError != null) {
-                              setState(() => _firstNameError = null);
-                            }
+                            setState(() => _firstNameError = null);
                           },
                           onSubmitted: (_) => _ageFocus.requestFocus(),
                         ),
                         const SizedBox(height: 20),
-                        AppInputField(
-                          label: 'AGE',
+                        AppAuthField(
+                          hint: 'Your age',
+                          prefixIcon: Icons.cake_outlined,
                           controller: _ageController,
                           focusNode: _ageFocus,
                           error: _ageError,
-                          hintText: 'Your age',
                           keyboardType: TextInputType.number,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
@@ -179,9 +185,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                           ],
                           textInputAction: TextInputAction.done,
                           onChanged: (_) {
-                            if (_ageError != null) {
-                              setState(() => _ageError = null);
-                            }
+                            setState(() => _ageError = null);
                           },
                           onSubmitted: (_) => _onNext(),
                         ),
@@ -197,7 +201,11 @@ class _UserInfoScreenState extends State<UserInfoScreen>
               padding: EdgeInsets.fromLTRB(24, 12, 24, bottomPad + 24),
               child: SizedBox(
                 width: double.infinity,
-                child: AppPrimaryButton(label: 'NEXT', onTap: _onNext),
+                child: AppPrimaryButton(
+                  label: 'Next',
+                  onTap: _onNext,
+                  enabled: _isFormValid,
+                ),
               ),
             ),
           ],
