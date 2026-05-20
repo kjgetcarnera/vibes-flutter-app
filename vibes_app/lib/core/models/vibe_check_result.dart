@@ -15,6 +15,8 @@ class VibeCheckResult {
     required this.frequencyCta,
     required this.frequencyRecommendation,
     required this.frequencyColors,
+    required this.frequencyBandMin,
+    required this.frequencyBandMax,
   });
 
   final String sessionId;
@@ -36,6 +38,8 @@ class VibeCheckResult {
   final String frequencyCta;
   final String frequencyRecommendation;
   final List<String> frequencyColors; // hex strings e.g. ["#4A90D9","#7EC8E3"]
+  final double frequencyBandMin;
+  final double frequencyBandMax;
 
   factory VibeCheckResult.fromJson(Map<String, dynamic> json) {
     final data = json['data'] as Map<String, dynamic>;
@@ -67,6 +71,8 @@ class VibeCheckResult {
       frequencyCta: bfs['activity_suggestion'] as String? ?? '',
       frequencyRecommendation: bfs['recommendation'] as String? ?? '',
       frequencyColors: parseColors(bfs),
+      frequencyBandMin: (bfs['band_min'] as num?)?.toDouble() ?? 0,
+      frequencyBandMax: (bfs['band_max'] as num?)?.toDouble() ?? 0,
     );
   }
 
@@ -87,5 +93,7 @@ class VibeCheckResult {
         frequencyCta: 'Let\'s build momentum',
         frequencyRecommendation: 'Try a grounding exercise first.',
         frequencyColors: ['#4A90D9', '#7EC8E3'],
+        frequencyBandMin: 183,
+        frequencyBandMax: 213,
       );
 }

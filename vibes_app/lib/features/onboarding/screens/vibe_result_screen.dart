@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 // ignore_for_file: avoid_print
 import 'package:flutter/services.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:google_fonts/google_fonts.dart';
+// import 'package:audioplayers/audioplayers.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/constants/app_assets.dart';
@@ -33,10 +34,10 @@ class _VibeResultScreenState extends State<VibeResultScreen>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  final AudioPlayer _player = AudioPlayer();
-  PlayerState _playerState = PlayerState.stopped;
-  Duration _position = Duration.zero;
-  Duration _duration = Duration.zero;
+  // final AudioPlayer _player = AudioPlayer();
+  // PlayerState _playerState = PlayerState.stopped;
+  // Duration _position = Duration.zero;
+  // Duration _duration = Duration.zero;
 
   @override
   void initState() {
@@ -54,21 +55,21 @@ class _VibeResultScreenState extends State<VibeResultScreen>
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
 
-    _player.onPlayerStateChanged.listen((s) {
-      if (mounted) setState(() => _playerState = s);
-    });
-    _player.onPositionChanged.listen((p) {
-      if (mounted) setState(() => _position = p);
-    });
-    _player.onDurationChanged.listen((d) {
-      if (mounted) setState(() => _duration = d);
-    });
+    // _player.onPlayerStateChanged.listen((s) {
+    //   if (mounted) setState(() => _playerState = s);
+    // });
+    // _player.onPositionChanged.listen((p) {
+    //   if (mounted) setState(() => _position = p);
+    // });
+    // _player.onDurationChanged.listen((d) {
+    //   if (mounted) setState(() => _duration = d);
+    // });
   }
 
   @override
   void dispose() {
     _fadeController.dispose();
-    _player.dispose();
+    // _player.dispose();
     super.dispose();
   }
 
@@ -507,22 +508,26 @@ class _FrequencyScoreCard extends StatelessWidget {
                       Text('Hz', style: _kBody),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
+                  if (result.frequencyBandMin > 0 || result.frequencyBandMax > 0) ...[
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: c2.withAlpha(200),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        'Band: ${result.frequencyBandMin.toStringAsFixed(0)}–${result.frequencyBandMax.toStringAsFixed(0)} Hz',
+                        style: _kCaption.copyWith(
+                          color: const Color(0xFFE8E8E8),
+                          letterSpacing: 0.4,
+                        ),
+                      ),
                     ),
-                    decoration: BoxDecoration(
-                      color: c2.withAlpha(30),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: c2.withAlpha(70)),
-                    ),
-                    child: Text(
-                      result.frequencyTag.toUpperCase(),
-                      style: _kCaption.copyWith(color: c2, letterSpacing: 0.6),
-                    ),
-                  ),
+                  ],
                 ],
               ),
 
@@ -558,37 +563,33 @@ class _FrequencyScoreCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Card-local text styles  (Kamerik105 for numbers/titles, SpaceMono for body)
+// Card-local text styles
 // ─────────────────────────────────────────────────────────────
-const _kBigNumber = TextStyle(
-  fontFamily: 'Kamerik105',
+final _kBigNumber = GoogleFonts.inter(
   fontSize: 50,
   fontWeight: FontWeight.w700,
-  color: Color(0xFFFFFEFE),
+  color: const Color(0xFFFFFEFE),
   letterSpacing: -1,
 );
 
-const _kHzNumber = TextStyle(
-  fontFamily: 'Kamerik105',
+final _kHzNumber = GoogleFonts.inter(
   fontSize: 36,
   fontWeight: FontWeight.w700,
-  color: Color(0xFFFFFEFE),
+  color: const Color(0xFFFFFEFE),
   letterSpacing: -0.5,
 );
 
-const _kCardTitle = TextStyle(
-  fontFamily: 'Kamerik105',
+final _kCardTitle = GoogleFonts.inter(
   fontSize: 20,
   fontWeight: FontWeight.w700,
-  color: Color(0xFFFFFEFE),
+  color: const Color(0xFFFFFEFE),
   letterSpacing: -0.3,
 );
 
-const _kStateName = TextStyle(
-  fontFamily: 'Kamerik105',
+final _kStateName = GoogleFonts.inter(
   fontSize: 14,
   fontWeight: FontWeight.w600,
-  color: Color(0xFFFFFEFE),
+  color: const Color(0xFFFFFEFE),
   letterSpacing: -0.2,
 );
 

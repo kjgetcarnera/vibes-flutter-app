@@ -49,12 +49,109 @@ flutter:
   fonts:
     - family: Kamerik105
       fonts:
-        - asset: assets/fonts/kamerik_105_light.otf
+        - asset: assets/fonts/Kamerik105Cyrillic-Thin.otf
+          weight: 100
+        - asset: assets/fonts/Kamerik105Cyrillic-Light.otf
           weight: 300
-        - asset: assets/fonts/kamerik_105_medium.otf
+        - asset: assets/fonts/Kamerik105Cyrillic-Book.otf
+          weight: 400
+        - asset: assets/fonts/Kamerik105-Medium.otf
           weight: 500
-        - asset: assets/fonts/kamerik_105_bold.otf
+        - asset: assets/fonts/Kamerik105Cyrillic-Bold.otf
           weight: 700
-        - asset: assets/fonts/kamerik_105_heavy.otf
+        - asset: assets/fonts/Kamerik105Cyrillic-Heavy.otf
           weight: 900
+
+    - family: PPSupplyMono
+      fonts:
+        - asset: assets/fonts/PPSupplyMono-Thin.otf
+          weight: 100
+        - asset: assets/fonts/PPSupplyMono-Ultralight.otf
+          weight: 200
+        - asset: assets/fonts/PPSupplyMono-Light.otf
+          weight: 300
+        - asset: assets/fonts/PPSupplyMono-Regular.otf
+          weight: 400
+        - asset: assets/fonts/PPSupplyMono-Medium.otf
+          weight: 500
+        - asset: assets/fonts/PPSupplyMono-Semibold.otf
+          weight: 600
+        - asset: assets/fonts/PPSupplyMono-Bold.otf
+          weight: 700
+        - asset: assets/fonts/PPSupplyMono-Black.otf
+          weight: 900
+
+    - family: DMSans
+      fonts:
+        - asset: assets/fonts/DmSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/DmSans-Bold.ttf
+          weight: 700
+
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Poppins-ExtraBold.ttf
+          weight: 800
+
+    - family: RobotoMono
+      fonts:
+        - asset: assets/fonts/RobotoMono-Bold.ttf
+          weight: 700
+
+    - family: SFMono
+      fonts:
+        - asset: assets/fonts/SFMono-Light.otf
+          weight: 300
+        - asset: assets/fonts/SFMono-Regular.otf
+          weight: 400
+        - asset: assets/fonts/SFMono-Medium.otf
+          weight: 500
+        - asset: assets/fonts/SFMono-Semibold.otf
+          weight: 600
+        - asset: assets/fonts/SFMono-Bold.otf
+          weight: 700
+        - asset: assets/fonts/SFMono-Heavy.otf
+          weight: 800
+
+    - family: SFProDisplay
+      fonts:
+        - asset: assets/fonts/SFProDisplay-Thin.otf
+          weight: 100
+        - asset: assets/fonts/SFProDisplay-Ultralight.otf
+          weight: 200
+        - asset: assets/fonts/SFProDisplay-Light.otf
+          weight: 300
+        - asset: assets/fonts/SFProDisplay-Regular.otf
+          weight: 400
+        - asset: assets/fonts/SFProDisplay-Medium.otf
+          weight: 500
+        - asset: assets/fonts/SFProDisplay-Semibold.otf
+          weight: 600
+        - asset: assets/fonts/SFProDisplay-Bold.otf
+          weight: 700
+        - asset: assets/fonts/SFProDisplay-Heavy.otf
+          weight: 800
+        - asset: assets/fonts/SFProDisplay-Black.otf
+          weight: 900
+
+    - family: SpaceGrotesk
+      fonts:
+        - asset: assets/fonts/SpaceGrotesk-Light.ttf
+          weight: 300
+        - asset: assets/fonts/SpaceGrotesk-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/SpaceGrotesk-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/SpaceGrotesk-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/SpaceGrotesk-Bold.ttf
+          weight: 700
 
