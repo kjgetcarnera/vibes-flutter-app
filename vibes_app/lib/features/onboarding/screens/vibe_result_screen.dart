@@ -5,7 +5,9 @@ import 'package:audioplayers/audioplayers.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/models/vibe_check_result.dart';
+import '../../../core/services/auth_session.dart';
 import '../../../core/widgets/app_icon_badge.dart';
+import '../../auth/screens/auth_screen.dart';
 
 class VibeResultScreen extends StatefulWidget {
   const VibeResultScreen({
@@ -66,6 +68,52 @@ class _VibeResultScreenState extends State<VibeResultScreen>
     _fadeController.dispose();
     _player.dispose();
     super.dispose();
+  }
+
+  Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF0D0F12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Logout?', style: AppTextStyles.headingBold),
+        content: Text(
+          'Are you sure you want to logout?',
+          style: AppTextStyles.bodyMono,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Cancel',
+              style: AppTextStyles.bodyMono.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              'Logout',
+              style: AppTextStyles.bodyMono.copyWith(color: Colors.redAccent),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+    await AuthSession.instance.clear();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const AuthScreen(),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 400),
+      ),
+      (_) => false,
+    );
   }
 
   Future<void> _togglePlayback() async {
@@ -141,6 +189,32 @@ class _VibeResultScreenState extends State<VibeResultScreen>
                             duration: _duration,
                             onTap: _togglePlayback,
                             formatDuration: _formatDuration,
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Logout
+                          GestureDetector(
+                            onTap: _logout,
+                            child: Container(
+                              width: double.infinity,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(30),
+                                border: Border.all(
+                                  color: Colors.white.withAlpha(40),
+                                  width: 1,
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Logout',
+                                style: AppTextStyles.kamerikToggle.copyWith(
+                                  fontSize: 16,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),

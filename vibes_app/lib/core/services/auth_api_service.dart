@@ -46,7 +46,7 @@ class AuthApiService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final result = AuthResult.fromJson(body);
-        AuthSession.instance.save(
+        await AuthSession.instance.save(
           accessToken: result.accessToken,
           userId: result.user.id,
           onboardingStatus: result.user.onboardingStatus,
@@ -95,7 +95,7 @@ class AuthApiService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final result = AuthResult.fromJson(body);
-        AuthSession.instance.save(
+        await AuthSession.instance.save(
           accessToken: result.accessToken,
           userId: result.user.id,
           onboardingStatus: result.user.onboardingStatus,
