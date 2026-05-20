@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+// ignore_for_file: avoid_print
 import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../../../core/constants/app_colors.dart';
@@ -289,11 +290,13 @@ class _BrainReadinessCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scoreColor = _parseColor(result.brainReadinessColors.firstOrNull) ??
+        const Color(0xFFFFA500);
+
     return _Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title row
           Row(
             children: [
               _IconBox(emoji: '🧠'),
@@ -303,78 +306,70 @@ class _BrainReadinessCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Score + state row
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               // Score
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        result.brainReadinessScore.toStringAsFixed(1),
-                        style: AppTextStyles.displayLarge.copyWith(
-                          fontSize: 48,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFFFFA500),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          result.brainReadinessScore.toStringAsFixed(1),
+                          style: AppTextStyles.displayLarge.copyWith(
+                            fontSize: 48,
+                            fontWeight: FontWeight.w700,
+                            color: scoreColor,
+                          ),
                         ),
-                      ),
-                      Text(
-                        ' /100',
-                        style: AppTextStyles.bodyMono.copyWith(
-                          color: AppColors.textMuted,
+                        Text(
+                          ' /100',
+                          style: AppTextStyles.bodyMono
+                              .copyWith(color: AppColors.textMuted),
                         ),
-                      ),
-                    ],
-                  ),
-                  Text('Just Now', style: AppTextStyles.caption),
-                ],
+                      ],
+                    ),
+                    Text('Just Now', style: AppTextStyles.caption),
+                  ],
+                ),
               ),
-              const Spacer(),
-              // State
+              // State pill
               Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 14,
-                        height: 14,
-                        decoration: const BoxDecoration(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Color(0xFFFFA500),
+                          color: scoreColor,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       Text(
-                        result.brainState,
-                        style: AppTextStyles.headingBold.copyWith(fontSize: 14),
+                        _formatState(result.brainState),
+                        style: AppTextStyles.headingBold.copyWith(fontSize: 13),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 22),
-                    child: Text(
-                      result.brainStateSubtitle,
-                      style: AppTextStyles.bodyMono.copyWith(
-                        color: const Color(0xFFFFA500),
-                        fontSize: 11,
-                      ),
+                  const SizedBox(height: 4),
+                  Text(
+                    result.brainStateSubtitle,
+                    style: AppTextStyles.bodyMono.copyWith(
+                      color: scoreColor,
+                      fontSize: 11,
                     ),
+                    textAlign: TextAlign.right,
                   ),
                   const SizedBox(height: 2),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 22),
-                    child: Text(
-                      'Your Brain State',
-                      style: AppTextStyles.caption,
-                    ),
-                  ),
+                  Text('Your Brain State', style: AppTextStyles.caption),
                 ],
               ),
             ],
@@ -382,9 +377,17 @@ class _BrainReadinessCard extends StatelessWidget {
 
           const SizedBox(height: 16),
           Divider(color: Colors.white.withAlpha(20), height: 1),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
           Text(result.brainStateDescription, style: AppTextStyles.bodyMono),
+          const SizedBox(height: 10),
+          Text(
+            result.brainReadinessRecommendation,
+            style: AppTextStyles.bodyMono.copyWith(
+              color: scoreColor.withAlpha(200),
+              fontSize: 11,
+            ),
+          ),
         ],
       ),
     );
@@ -400,6 +403,12 @@ class _FrequencyScoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor =
+        _parseColor(result.frequencyColors.firstOrNull) ?? AppColors.accentCyan;
+    final secondaryColor = result.frequencyColors.length > 1
+        ? (_parseColor(result.frequencyColors[1]) ?? primaryColor)
+        : primaryColor;
+
     return _Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -410,108 +419,123 @@ class _FrequencyScoreCard extends StatelessWidget {
               _IconBox(emoji: '📡'),
               const SizedBox(width: 12),
               Text('Frequency Score', style: AppTextStyles.headingBold),
+              const Spacer(),
+              // State badge
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                decoration: BoxDecoration(
+                  color: primaryColor.withAlpha(30),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: primaryColor.withAlpha(80)),
+                ),
+                child: Text(
+                  _formatState(result.frequencyLabel),
+                  style: AppTextStyles.caption.copyWith(
+                    color: primaryColor,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
 
           // Score row
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
-              // Left: score + hz
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          '${result.frequencyScore}',
-                          style: AppTextStyles.displayLarge.copyWith(
-                            fontSize: 48,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        Text(
-                          ' /100',
-                          style: AppTextStyles.bodyMono.copyWith(
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Text('Just Now', style: AppTextStyles.caption),
-                    const SizedBox(height: 16),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          '${result.frequencyHz.toInt()}',
-                          style: AppTextStyles.displayLarge.copyWith(
-                            fontSize: 36,
-                          ),
-                        ),
-                        Text(
-                          ' Hz',
-                          style: AppTextStyles.bodyMono.copyWith(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      'Tag: ${result.frequencyTag.toUpperCase()}',
-                      style: AppTextStyles.caption,
-                    ),
-                  ],
+              ShaderMask(
+                shaderCallback: (bounds) => LinearGradient(
+                  colors: [primaryColor, secondaryColor],
+                ).createShader(bounds),
+                child: Text(
+                  result.frequencyScore.toStringAsFixed(1),
+                  style: AppTextStyles.displayLarge.copyWith(
+                    fontSize: 52,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
                 ),
               ),
+              Text(
+                ' /100',
+                style:
+                    AppTextStyles.bodyMono.copyWith(color: AppColors.textMuted),
+              ),
+            ],
+          ),
+          Text('Just Now', style: AppTextStyles.caption),
 
-              // Right: label + cta + vibing
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+          const SizedBox(height: 16),
+          Divider(color: Colors.white.withAlpha(20), height: 1),
+          const SizedBox(height: 14),
+
+          // Hz + Tag row
+          Row(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
                 children: [
-                  // Recovering badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF3A4A2A),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      result.frequencyLabel,
-                      style: AppTextStyles.caption.copyWith(
-                        color: const Color(0xFFB5D96A),
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
                   Text(
-                    '${result.frequencyCta} →→',
-                    style: AppTextStyles.bodyMono.copyWith(fontSize: 11),
-                    textAlign: TextAlign.right,
-                  ),
-                  const SizedBox(height: 24),
-                  Text('Recommendation', style: AppTextStyles.caption),
-                  const SizedBox(height: 6),
-                  SizedBox(
-                    width: 140,
-                    child: Text(
-                      result.frequencyRecommendation,
-                      style: AppTextStyles.bodyMono.copyWith(fontSize: 10),
-                      textAlign: TextAlign.right,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
+                    result.frequencyHz.toStringAsFixed(1),
+                    style: AppTextStyles.displayLarge.copyWith(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w700,
                     ),
+                  ),
+                  Text(
+                    ' Hz',
+                    style:
+                        AppTextStyles.bodyMono.copyWith(fontSize: 13),
                   ),
                 ],
               ),
+              const SizedBox(width: 12),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: secondaryColor.withAlpha(30),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: secondaryColor.withAlpha(80)),
+                ),
+                child: Text(
+                  result.frequencyTag.toUpperCase(),
+                  style: AppTextStyles.caption.copyWith(
+                    color: secondaryColor,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+              ),
             ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // Meaning
+          Text(result.frequencyMeaning, style: AppTextStyles.bodyMono),
+          const SizedBox(height: 10),
+
+          // CTA
+          Text(
+            result.frequencyCta,
+            style: AppTextStyles.bodyMono.copyWith(
+              color: primaryColor.withAlpha(200),
+              fontSize: 11,
+            ),
+          ),
+          const SizedBox(height: 6),
+
+          // Recommendation
+          Text(
+            result.frequencyRecommendation,
+            style: AppTextStyles.bodyMono.copyWith(
+              color: AppColors.textMuted,
+              fontSize: 11,
+            ),
           ),
         ],
       ),
@@ -633,4 +657,34 @@ class _IconBox extends StatelessWidget {
       child: Center(child: Text(emoji, style: const TextStyle(fontSize: 20))),
     );
   }
+}
+
+// ─────────────────────────────────────────────────────────────
+// File-level helpers
+// ─────────────────────────────────────────────────────────────
+
+/// Parses a hex color string like "#4CAF50" into a Color.
+Color? _parseColor(String? hex) {
+  if (hex == null || hex.isEmpty) return null;
+  final clean = hex.replaceAll('#', '').trim();
+  if (clean.length == 6) {
+    final value = int.tryParse('FF$clean', radix: 16);
+    return value != null ? Color(value) : null;
+  }
+  if (clean.length == 8) {
+    final value = int.tryParse(clean, radix: 16);
+    return value != null ? Color(value) : null;
+  }
+  return null;
+}
+
+/// Converts snake_case or hyphen-case state strings to Title Case.
+/// e.g. "over_activated" → "Over Activated", "Ready" → "Ready"
+String _formatState(String state) {
+  return state
+      .replaceAll('_', ' ')
+      .replaceAll('-', ' ')
+      .split(' ')
+      .map((w) => w.isEmpty ? w : '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}')
+      .join(' ');
 }
