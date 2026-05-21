@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -46,6 +47,13 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
   bool _isPaused = false;
   bool _isSubmitting = false;
 
+  static const int _minRecordSeconds = 20;
+  int _activeRecordSeconds = 0;
+  Timer? _recordTimer;
+
+  bool get _canSubmit =>
+      _isRecording && _activeRecordSeconds >= _minRecordSeconds;
+
   @override
   void initState() {
     super.initState();
@@ -72,6 +80,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
 
   @override
   void dispose() {
+    _recordTimer?.cancel();
     _fadeController.dispose();
     _rotationController.dispose();
     _recorder.dispose();
@@ -97,22 +106,41 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
     if (mounted) {
       setState(() => _isRecording = true);
       _rotationController.repeat();
+      _startTimer();
     }
+  }
+
+  void _startTimer() {
+    _recordTimer?.cancel();
+    _recordTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && _isRecording && !_isPaused) {
+        setState(() => _activeRecordSeconds++);
+      }
+    });
   }
 
   Future<void> _togglePause() async {
     if (_isPaused) {
       await _recorder.resume();
       _rotationController.repeat();
+      _startTimer();
     } else {
       await _recorder.pause();
       _rotationController.stop();
+      _recordTimer?.cancel();
     }
     if (mounted) setState(() => _isPaused = !_isPaused);
   }
 
   Future<void> _stopAndSubmit() async {
     if (_isSubmitting) return;
+
+    if (!_canSubmit) {
+      _showError('Please read the full passage before submitting.');
+      return;
+    }
+
+    _recordTimer?.cancel();
     setState(() => _isSubmitting = true);
 
     final path = await _recorder.stop();
@@ -315,20 +343,20 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                         ),
                       ),
                       GestureDetector(
-                        onTap: _isRecording ? _stopAndSubmit : null,
+                        onTap: _canSubmit ? _stopAndSubmit : null,
                         child: Container(
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: _isRecording
+                            gradient: _canSubmit
                                 ? AppColors.accentGradient
                                 : null,
-                            color: _isRecording ? null : AppColors.knobCenter,
+                            color: _canSubmit ? null : AppColors.knobCenter,
                           ),
                           child: Icon(
                             Icons.check,
-                            color: _isRecording
+                            color: _canSubmit
                                 ? Colors.black
                                 : AppColors.textMuted,
                             size: 20,

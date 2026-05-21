@@ -292,9 +292,12 @@ class _BrainReadinessCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scoreColor =
-        _parseColor(result.brainReadinessColors.firstOrNull) ??
-        const Color(0xFFFFA500);
+    final c1 = _parseColor(result.brainReadinessColors.firstOrNull) ??
+        const Color(0xFFF9DF17);
+    final c2 = result.brainReadinessColors.length > 1
+        ? (_parseColor(result.brainReadinessColors[1]) ?? c1)
+        : c1;
+    final gradient = LinearGradient(colors: [c1, c2]);
 
     return _Card(
       child: Column(
@@ -314,7 +317,7 @@ class _BrainReadinessCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Left — big score
+              // Left — big score with gradient
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -322,9 +325,12 @@ class _BrainReadinessCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
-                      Text(
-                        result.brainReadinessScore.toStringAsFixed(1),
-                        style: _kBigNumber.copyWith(color: scoreColor),
+                      ShaderMask(
+                        shaderCallback: (b) => gradient.createShader(b),
+                        child: Text(
+                          result.brainReadinessScore.toStringAsFixed(1),
+                          style: _kBigNumber.copyWith(color: Colors.white),
+                        ),
                       ),
                       const SizedBox(width: 4),
                       Text('/100', style: _kMuted),
@@ -344,12 +350,16 @@ class _BrainReadinessCard extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: scoreColor,
+                      // Dot: gradient if two colors, flat if one
+                      ShaderMask(
+                        shaderCallback: (b) => gradient.createShader(b),
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 7),
@@ -357,10 +367,13 @@ class _BrainReadinessCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 5),
-                  Text(
-                    result.brainStateSubtitle,
-                    style: _kMonoSm.copyWith(color: scoreColor),
-                    textAlign: TextAlign.right,
+                  ShaderMask(
+                    shaderCallback: (b) => gradient.createShader(b),
+                    child: Text(
+                      result.brainStateSubtitle,
+                      style: _kMonoSm.copyWith(color: Colors.white),
+                      textAlign: TextAlign.right,
+                    ),
                   ),
                   const SizedBox(height: 3),
                   Text('Your Brain State', style: _kCaption),
@@ -376,9 +389,12 @@ class _BrainReadinessCard extends StatelessWidget {
           Text(result.brainStateDescription, style: _kBody),
           if (result.brainReadinessRecommendation.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text(
-              result.brainReadinessRecommendation,
-              style: _kMonoSm.copyWith(color: scoreColor.withAlpha(180)),
+            ShaderMask(
+              shaderCallback: (b) => gradient.createShader(b),
+              child: Text(
+                result.brainReadinessRecommendation,
+                style: _kMonoSm.copyWith(color: Colors.white),
+              ),
             ),
           ],
         ],
@@ -508,7 +524,8 @@ class _FrequencyScoreCard extends StatelessWidget {
                       Text('Hz', style: _kBody),
                     ],
                   ),
-                  if (result.frequencyBandMin > 0 || result.frequencyBandMax > 0) ...[
+                  if (result.frequencyBandMin > 0 ||
+                      result.frequencyBandMax > 0) ...[
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(

@@ -92,6 +92,24 @@ class VibeApiService {
         if (result.sessionId.isNotEmpty) {
           AuthSession.instance.saveSessionId(result.sessionId);
         }
+
+        try {
+          final data = body['data'] as Map<String, dynamic>;
+          final scores = data['scores'] as Map<String, dynamic>;
+          const encoder = JsonEncoder.withIndent('  ');
+          print('');
+          print('━━━━━━━━━━━━ [VIBE] scores.brain_readiness ━━━━━━━━━━━━');
+          print(encoder.convert(scores['brain_readiness']));
+          print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+          print('');
+          print('━━━━━━━━━━━━ [VIBE] scores.brain_frequency ━━━━━━━━━━━━');
+          print(encoder.convert(scores['brain_frequency']));
+          print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+          print('');
+        } catch (e) {
+          print('[VIBE] Could not extract scores for logging: $e');
+        }
+
         print('[VIBE] Score received. sessionId=${result.sessionId}');
         return result;
       }
