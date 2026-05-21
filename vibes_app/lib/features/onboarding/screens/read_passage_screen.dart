@@ -3,12 +3,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/widgets/app_icon_badge.dart';
+import '../../../core/widgets/mic_permission_guard.dart';
 import 'vibe_loading_screen.dart';
 
 const _passage =
@@ -65,7 +65,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
     _rotationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 3000),
-    )..repeat();
+    );
 
     _startRecording();
   }
@@ -79,8 +79,12 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
   }
 
   Future<void> _startRecording() async {
-    final status = await Permission.microphone.request();
-    if (!mounted || !status.isGranted) return;
+    final granted = await MicPermissionGuard.check(context);
+    if (!mounted) return;
+    if (!granted) {
+      Navigator.of(context).pop();
+      return;
+    }
 
     final dir = await getTemporaryDirectory();
     final path =
@@ -90,7 +94,10 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
       const RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 128000),
       path: path,
     );
-    if (mounted) setState(() => _isRecording = true);
+    if (mounted) {
+      setState(() => _isRecording = true);
+      _rotationController.repeat();
+    }
   }
 
   Future<void> _togglePause() async {
