@@ -17,11 +17,15 @@ class VibeLoadingScreen extends StatefulWidget {
     required this.firstName,
     required this.age,
     required this.audioFile,
+    this.latitude,
+    this.longitude,
   });
 
   final String firstName;
   final int age;
   final File audioFile;
+  final double? latitude;
+  final double? longitude;
 
   @override
   State<VibeLoadingScreen> createState() => _VibeLoadingScreenState();
@@ -53,6 +57,8 @@ class _VibeLoadingScreenState extends State<VibeLoadingScreen>
     try {
       result = await VibeApiService.submitPreScore(
         audioFile: widget.audioFile,
+        latitude: widget.latitude,
+        longitude: widget.longitude,
       );
     } catch (e) {
       print('[VibeLoading] API error, using mock: $e');

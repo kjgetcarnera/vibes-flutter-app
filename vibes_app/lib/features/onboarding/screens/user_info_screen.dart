@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
+import '../../../core/services/location_service.dart';
 import '../../../core/widgets/app_auth_field.dart';
 import '../../../core/widgets/app_icon_badge.dart';
 import '../../../core/widgets/app_primary_button.dart';
+import '../../../core/widgets/location_fetcher.dart';
 import 'read_passage_screen.dart';
 
 class UserInfoScreen extends StatefulWidget {
@@ -27,6 +29,8 @@ class _UserInfoScreenState extends State<UserInfoScreen>
 
   String? _firstNameError;
   String? _ageError;
+
+  LocationResult? _locationResult;
 
   bool get _isFormValid {
     final name = _firstNameController.text.trim();
@@ -101,6 +105,8 @@ class _UserInfoScreenState extends State<UserInfoScreen>
         builder: (_) => ReadPassageScreen(
           firstName: _firstNameController.text.trim(),
           age: int.parse(_ageController.text.trim()),
+          latitude: _locationResult?.latitude,
+          longitude: _locationResult?.longitude,
         ),
       ),
     );
@@ -126,6 +132,10 @@ class _UserInfoScreenState extends State<UserInfoScreen>
         resizeToAvoidBottomInset: true,
         body: Column(
           children: [
+            // Silently fetches location in background as soon as screen loads
+            LocationFetcher(
+              onResult: (result) => setState(() => _locationResult = result),
+            ),
             Expanded(
               child: FadeTransition(
                 opacity: _fadeAnimation,

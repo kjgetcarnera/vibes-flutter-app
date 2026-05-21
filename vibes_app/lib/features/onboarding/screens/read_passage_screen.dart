@@ -21,10 +21,14 @@ class ReadPassageScreen extends StatefulWidget {
     super.key,
     required this.firstName,
     required this.age,
+    this.latitude,
+    this.longitude,
   });
 
   final String firstName;
   final int age;
+  final double? latitude;
+  final double? longitude;
 
   @override
   State<ReadPassageScreen> createState() => _ReadPassageScreenState();
@@ -120,6 +124,8 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
           firstName: widget.firstName,
           age: widget.age,
           audioFile: File(path),
+          latitude: widget.latitude,
+          longitude: widget.longitude,
         ),
         transitionsBuilder: (_, anim, __, child) =>
             FadeTransition(opacity: anim, child: child),

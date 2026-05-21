@@ -26,6 +26,8 @@ class VibeApiService {
   static Future<VibeCheckResult> submitPreScore({
     required File audioFile,
     int? currentJourneyId,
+    double? latitude,
+    double? longitude,
   }) async {
     final uri = Uri.parse('$_baseUrl/api/v1/score');
     final journeyId = currentJourneyId ??
@@ -51,14 +53,16 @@ class VibeApiService {
       ..headers['Authorization'] = AuthSession.instance.authHeader
       ..headers['accept'] = 'application/json'
       ..fields['phase'] = 'pre'
-      ..fields['current_journey_id'] = journeyId.toString()
-      ..files.add(
-        await http.MultipartFile.fromPath(
-          'audio',
-          audioFile.path,
-          filename: 'recording.m4a',
-        ),
-      );
+      ..fields['current_journey_id'] = journeyId.toString();
+    if (latitude != null) request.fields['latitude'] = latitude.toString();
+    if (longitude != null) request.fields['longitude'] = longitude.toString();
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'audio',
+        audioFile.path,
+        filename: 'recording.m4a',
+      ),
+    );
 
     try {
       final stopwatch = Stopwatch()..start();

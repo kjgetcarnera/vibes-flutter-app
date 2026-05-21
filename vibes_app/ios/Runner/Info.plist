@@ -49,5 +49,7 @@
 		<false/>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>Vibes needs microphone access to analyze your voice vibrations.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Vibes uses your location to personalise your brain state analysis.</string>
 	</dict>
 </plist>
