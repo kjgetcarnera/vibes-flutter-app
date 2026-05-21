@@ -478,7 +478,7 @@ class _FrequencyScoreCard extends StatelessWidget {
                       border: Border.all(color: c1.withAlpha(100)),
                     ),
                     child: Text(
-                      _formatState(result.frequencyLabel),
+                      _formatState(result.frequencyTag),
                       style: _kCaption.copyWith(color: c1, letterSpacing: 0.3),
                     ),
                   ),
