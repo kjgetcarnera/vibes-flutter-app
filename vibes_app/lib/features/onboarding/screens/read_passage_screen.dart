@@ -155,212 +155,192 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
     final topPad = mq.padding.top;
     final bottomPad = mq.padding.bottom;
 
-    // VAIA image area sits just above the safe-area bottom + 20pt
-    const vaiaImageSize = 72.0;
-    const vaiaBottomPadding = 20.0;
-    final vaiaAreaHeight = vaiaImageSize + vaiaBottomPadding + bottomPad;
-    const recordBarHeight = 72.0;
-    final recordBarBottom = vaiaAreaHeight;
-
     return Scaffold(
       backgroundColor: AppColors.background,
       resizeToAvoidBottomInset: false,
-      body: Stack(
+      body: Column(
         children: [
-          // ── Scrollable passage ──
-          FadeTransition(
-            opacity: _fadeAnimation,
-            child: SlideTransition(
-              position: _slideAnimation,
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.only(
-                  top: topPad + 72,
-                  left: 24,
-                  right: 24,
-                  bottom: recordBarBottom + recordBarHeight + 16,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'READ THIS PASSAGE OUTLOUD',
-                      style: AppTextStyles.caption.copyWith(letterSpacing: 1.2),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(_passage, style: AppTextStyles.displayMedium),
-                  ],
-                ),
+          // ── Top nav bar ──
+          Container(
+            padding: EdgeInsets.only(
+              top: topPad + 8,
+              left: 20,
+              right: 20,
+              bottom: 12,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              border: Border(
+                bottom: BorderSide(color: Colors.white.withAlpha(15), width: 1),
               ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: _cancel,
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.knobCenter,
+                      border: Border.all(color: AppColors.knobOuter, width: 1),
+                    ),
+                    child: const Icon(
+                      Icons.chevron_left,
+                      color: AppColors.textSecondary,
+                      size: 22,
+                    ),
+                  ),
+                ),
+                const AppIconBadge(),
+              ],
             ),
           ),
 
-          // ── Sticky top nav bar ──
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: EdgeInsets.only(
-                top: topPad + 8,
-                left: 20,
-                right: 20,
-                bottom: 12,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                border: Border(
-                  bottom: BorderSide(
-                    color: Colors.white.withAlpha(15),
-                    width: 1,
+          // ── Scrollable passage (fills remaining space) ──
+          Expanded(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'READ THIS PASSAGE OUTLOUD',
+                        style: AppTextStyles.caption.copyWith(
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _passage,
+                        style: const TextStyle(
+                          color: Color(0xFFFFFFFF),
+                          fontFamily: 'SF Pro Display',
+                          fontSize: 24,
+                          fontStyle: FontStyle.normal,
+                          fontWeight: FontWeight.w400,
+                          height: 40 / 24,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: _cancel,
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.knobCenter,
-                        border: Border.all(
-                          color: AppColors.knobOuter,
-                          width: 1,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.chevron_left,
-                        color: AppColors.textSecondary,
-                        size: 22,
+            ),
+          ),
+
+          // ── Record bar ──
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              border: Border(
+                top: BorderSide(color: Colors.white.withAlpha(15), width: 1),
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(24, 14, 24, 14),
+            child: _isSubmitting
+                ? const Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.accentCyan,
                       ),
                     ),
-                  ),
-                  const AppIconBadge(),
-                ],
-              ),
-            ),
-          ),
-
-          // ── VAIA rotating image (below record bar) ──
-          Positioned(
-            bottom: bottomPad,
-            left: 0,
-            right: 0,
-            height: vaiaImageSize,
-            child: Center(
-              child: AnimatedBuilder(
-                animation: _rotationController,
-                builder: (_, child) => Transform.rotate(
-                  angle: _rotationController.value * 2 * 3.141592653589793,
-                  child: child,
-                ),
-                child: Image.asset(
-                  'assets/images/VAIA.png',
-                  width: vaiaImageSize,
-                  height: vaiaImageSize,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ),
-
-          // ── Sticky bottom record bar ──
-          Positioned(
-            bottom: recordBarBottom,
-            left: 0,
-            right: 0,
-            height: recordBarHeight,
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                border: Border(
-                  top: BorderSide(color: Colors.white.withAlpha(15), width: 1),
-                ),
-              ),
-              padding: const EdgeInsets.fromLTRB(24, 14, 24, 14),
-              child: _isSubmitting
-                  ? const Center(
-                      child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.accentCyan,
+                  )
+                : Row(
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 400),
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _isRecording && !_isPaused
+                              ? const Color(0xFFFF2D87)
+                              : AppColors.textMuted,
                         ),
                       ),
-                    )
-                  : Row(
-                      children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 400),
-                          width: 10,
-                          height: 10,
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _isRecording
+                              ? (_isPaused ? 'Paused' : 'Recording...')
+                              : 'Starting mic...',
+                          style: AppTextStyles.bodyMono,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: _isRecording ? _togglePause : null,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          margin: const EdgeInsets.only(right: 12),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: _isRecording && !_isPaused
-                                ? const Color(0xFFFF2D87)
+                            color: AppColors.knobCenter,
+                            border: Border.all(
+                              color: AppColors.knobOuter,
+                              width: 1,
+                            ),
+                          ),
+                          child: Icon(
+                            _isPaused ? Icons.play_arrow : Icons.pause,
+                            color: _isRecording
+                                ? AppColors.textPrimary
                                 : AppColors.textMuted,
+                            size: 20,
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            _isRecording
-                                ? (_isPaused ? 'Paused' : 'Recording...')
-                                : 'Starting mic...',
-                            style: AppTextStyles.bodyMono,
+                      ),
+                      GestureDetector(
+                        onTap: _isRecording ? _stopAndSubmit : null,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: _isRecording
+                                ? AppColors.accentGradient
+                                : null,
+                            color: _isRecording ? null : AppColors.knobCenter,
+                          ),
+                          child: Icon(
+                            Icons.check,
+                            color: _isRecording
+                                ? Colors.black
+                                : AppColors.textMuted,
+                            size: 20,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: _isRecording ? _togglePause : null,
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            margin: const EdgeInsets.only(right: 12),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.knobCenter,
-                              border: Border.all(
-                                color: AppColors.knobOuter,
-                                width: 1,
-                              ),
-                            ),
-                            child: Icon(
-                              _isPaused ? Icons.play_arrow : Icons.pause,
-                              color: _isRecording
-                                  ? AppColors.textPrimary
-                                  : AppColors.textMuted,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: _isRecording ? _stopAndSubmit : null,
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: _isRecording
-                                  ? AppColors.accentGradient
-                                  : null,
-                              color: _isRecording ? null : AppColors.knobCenter,
-                            ),
-                            child: Icon(
-                              Icons.check,
-                              color: _isRecording
-                                  ? Colors.black
-                                  : AppColors.textMuted,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
+          ),
+
+          // ── VAIA rotating image ──
+          Padding(
+            padding: EdgeInsets.only(top: 16, bottom: bottomPad + 20),
+            child: AnimatedBuilder(
+              animation: _rotationController,
+              builder: (_, child) => Transform.rotate(
+                angle: _rotationController.value * 2 * 3.141592653589793,
+                child: child,
+              ),
+              child: Image.asset(
+                'assets/images/VAIA.png',
+                width: 72,
+                height: 72,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
         ],
