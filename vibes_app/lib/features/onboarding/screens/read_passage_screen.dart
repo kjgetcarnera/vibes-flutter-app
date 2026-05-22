@@ -342,7 +342,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                       Expanded(
                         child: Text(
                           _isRecording
-                              ? (_isPaused ? 'Paused' : 'Recording...')
+                              ? (_isPaused ? 'Paused' : 'VAIA is listening...')
                               : 'Starting mic...',
                           style: AppTextStyles.bodyMono,
                         ),
