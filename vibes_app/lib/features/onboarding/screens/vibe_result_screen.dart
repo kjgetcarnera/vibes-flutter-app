@@ -882,7 +882,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 12),
           child: Text(
-            "Let’s change that:",
+            "Let's change that:",
             style: const TextStyle(
               fontFamily: 'PPSupplyMono',
               fontSize: 22,
@@ -893,7 +893,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
           ),
         ),
         SizedBox(
-          height: 180,
+          height: 160,
           child: PageView.builder(
             controller: _pageController,
             itemCount: widget.audios.length,
@@ -910,21 +910,21 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                   : 0.0;
 
               return AnimatedScale(
-                scale: _currentPage == i ? 1.0 : 0.95,
+                scale: _currentPage == i ? 1.0 : 0.96,
                 duration: const Duration(milliseconds: 300),
                 child: Container(
                   margin: const EdgeInsets.only(right: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0D0F12),
+                    color: const Color(0xFF111316),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: Colors.white.withAlpha(isActive ? 40 : 18),
+                      color: Colors.white.withAlpha(isActive ? 35 : 15),
                       width: 1,
                     ),
                   ),
                   child: Row(
                     children: [
-                      // Cover image
+                      // ── Cover image (full height, square) ──
                       ClipRRect(
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(15),
@@ -932,11 +932,11 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                         ),
                         child: Image.network(
                           audio.coverImageUrl,
-                          width: 130,
+                          width: 140,
                           height: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
-                            width: 130,
+                            width: 140,
                             color: AppColors.knobCenter,
                             child: const Icon(
                               Icons.music_note,
@@ -946,106 +946,148 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                           ),
                         ),
                       ),
-                      // Info + controls
+
+                      // ── Right panel ──
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                          padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'TRACK',
-                                style: const TextStyle(
-                                  fontFamily: 'PPSupplyMono',
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0x80939AA6),
-                                  letterSpacing: 1.4,
-                                ),
+                              // TRACK label + share icon
+                              Row(
+                                children: [
+                                  const Text(
+                                    'TRACK',
+                                    style: TextStyle(
+                                      fontFamily: 'PPSupplyMono',
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0x80939AA6),
+                                      letterSpacing: 1.6,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: AppColors.knobCenter,
+                                      border: Border.all(
+                                        color: AppColors.knobOuter,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.ios_share,
+                                      color: AppColors.textSecondary,
+                                      size: 13,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 5),
+
+                              // Track name
                               Text(
                                 audio.name,
                                 style: GoogleFonts.inter(
-                                  fontSize: 16,
+                                  fontSize: 17,
                                   fontWeight: FontWeight.w700,
                                   color: Colors.white,
-                                  letterSpacing: -0.3,
+                                  letterSpacing: -0.4,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 2),
+
+                              // Subtitle
                               Text(
                                 audio.subtitle,
                                 style: const TextStyle(
                                   fontFamily: 'PPSupplyMono',
                                   fontSize: 10,
-                                  color: Color(0xB3FFFEFE),
+                                  color: Color(0xB3939AA6),
                                 ),
-                                maxLines: 2,
+                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
+
                               const Spacer(),
-                              // Waveform progress bar
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(3),
-                                child: LinearProgressIndicator(
-                                  value: progress.toDouble(),
-                                  backgroundColor: Colors.white.withAlpha(20),
-                                  valueColor:
-                                      const AlwaysStoppedAnimation<Color>(
-                                        AppColors.accentCyan,
-                                      ),
-                                  minHeight: 3,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
+
+                              // Play button + waveform row
                               Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  // Play/pause button
+                                  // Play/pause
                                   GestureDetector(
                                     onTap: () => _togglePlay(audio),
                                     child: Container(
-                                      width: 36,
-                                      height: 36,
+                                      width: 38,
+                                      height: 38,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        gradient: isActive
-                                            ? AppColors.accentGradient
-                                            : null,
-                                        color: isActive
-                                            ? null
-                                            : AppColors.knobCenter,
-                                        border: isActive
-                                            ? null
-                                            : Border.all(
-                                                color: AppColors.knobOuter,
-                                                width: 1,
-                                              ),
+                                        color: AppColors.knobCenter,
+                                        border: Border.all(
+                                          color: AppColors.knobOuter,
+                                          width: 1,
+                                        ),
                                       ),
-                                      child: Icon(
-                                        isPlaying
-                                            ? Icons.pause
-                                            : Icons.play_arrow,
-                                        color: isActive
-                                            ? Colors.black
-                                            : AppColors.textSecondary,
-                                        size: 18,
+                                      child: ShaderMask(
+                                        shaderCallback: (b) =>
+                                            const LinearGradient(
+                                              colors: [
+                                                Color(0xFF2FE17A),
+                                                Color(0xFF00FFF7),
+                                              ],
+                                            ).createShader(b),
+                                        child: Icon(
+                                          isPlaying
+                                              ? Icons.pause
+                                              : Icons.play_arrow,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  // Time
-                                  Text(
-                                    isActive
-                                        ? '${_fmt(_position)} | ${_fmt(_duration)}'
-                                        : '00:00',
-                                    style: const TextStyle(
-                                      fontFamily: 'PPSupplyMono',
-                                      fontSize: 9,
-                                      color: Color(0x80939AA6),
-                                      letterSpacing: 0.4,
+                                  const SizedBox(width: 10),
+
+                                  // Waveform + time stacked
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          height: 28,
+                                          child: CustomPaint(
+                                            painter: _WaveformPainter(
+                                              progress: progress.toDouble(),
+                                              seed: audio.id,
+                                            ),
+                                            size: const Size(
+                                              double.infinity,
+                                              28,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          isActive
+                                              ? '${_fmt(_position)}  |  ${_fmt(_duration)}'
+                                              : '00:00  |  --:--',
+                                          style: const TextStyle(
+                                            fontFamily: 'PPSupplyMono',
+                                            fontSize: 8,
+                                            color: Color(0x80939AA6),
+                                            letterSpacing: 0.3,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -1062,6 +1104,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
           ),
         ),
         const SizedBox(height: 12),
+
         // Dot indicators
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1081,7 +1124,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                         end: Alignment.centerRight,
                       )
                     : null,
-                color: active ? Color(0xFF2FE17A) : Colors.white.withAlpha(40),
+                color: active ? null : Colors.white.withAlpha(40),
               ),
             );
           }),
@@ -1090,7 +1133,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
         Padding(
           padding: const EdgeInsets.only(left: 25, right: 10),
           child: Text(
-            "After, we’ll check in again.You’ll hear how your voice shifted from wired to grounded. ",
+            "After, we'll check in again. You'll hear how your voice shifted from wired to grounded.",
             style: const TextStyle(
               fontFamily: 'PPSupplyMono',
               fontSize: 18,
@@ -1104,6 +1147,62 @@ class _AudioCarouselState extends State<_AudioCarousel> {
       ],
     );
   }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Waveform Painter
+// ─────────────────────────────────────────────────────────────
+class _WaveformPainter extends CustomPainter {
+  _WaveformPainter({required this.progress, required this.seed});
+
+  final double progress;
+  final int seed;
+
+  List<double> _bars(int count) {
+    final r = <double>[];
+    var v = seed * 1234567;
+    for (var i = 0; i < count; i++) {
+      v = (v * 1103515245 + 12345) & 0x7fffffff;
+      r.add(0.2 + (v % 100) / 100.0 * 0.8);
+    }
+    return r;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const barCount = 36;
+    const barSpacing = 2.0;
+    final barWidth = (size.width - barSpacing * (barCount - 1)) / barCount;
+    final bars = _bars(barCount);
+
+    final playedPaint = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFF2FE17A), Color(0xFF00FFF7)],
+      ).createShader(Offset.zero & size)
+      ..strokeCap = StrokeCap.round;
+
+    final unplayedPaint = Paint()
+      ..color = Colors.white.withAlpha(35)
+      ..strokeCap = StrokeCap.round;
+
+    for (var i = 0; i < barCount; i++) {
+      final x = i * (barWidth + barSpacing);
+      final barH = bars[i] * size.height;
+      final top = (size.height - barH) / 2;
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(x, top, barWidth, barH),
+        const Radius.circular(2),
+      );
+      canvas.drawRRect(
+        rect,
+        i / barCount < progress ? playedPaint : unplayedPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_WaveformPainter old) =>
+      old.progress != progress || old.seed != seed;
 }
 
 /// Converts snake_case or hyphen-case state strings to Title Case.
