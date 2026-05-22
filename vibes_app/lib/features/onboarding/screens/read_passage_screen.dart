@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../core/constants/app_colors.dart';
@@ -42,6 +43,10 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
   late Animation<Offset> _slideAnimation;
   late AnimationController _rotationController;
 
+  final FlutterTts _tts = FlutterTts();
+  bool _ttsDisposed = false;
+  bool _isSpeaking = false;
+
   final AudioRecorder _recorder = AudioRecorder();
   bool _isRecording = false;
   bool _isPaused = false;
@@ -75,11 +80,33 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
       duration: const Duration(milliseconds: 3000),
     );
 
-    _startRecording();
+    _speakIntro();
+  }
+
+  Future<void> _speakIntro() async {
+    await _tts.setLanguage('en-US');
+    if (_ttsDisposed) return;
+    await _tts.setSpeechRate(0.35);
+    if (_ttsDisposed) return;
+    _tts.setStartHandler(() {
+      if (!_ttsDisposed) setState(() => _isSpeaking = true);
+    });
+    _tts.setCompletionHandler(() async {
+      if (_ttsDisposed) return;
+      setState(() => _isSpeaking = false);
+      await Future.delayed(const Duration(seconds: 1));
+      if (!_ttsDisposed && mounted) _startRecording();
+    });
+    _tts.setCancelHandler(() {
+      if (!_ttsDisposed) setState(() => _isSpeaking = false);
+    });
+    await _tts.speak('Read this passage out loud.');
   }
 
   @override
   void dispose() {
+    _ttsDisposed = true;
+    _tts.stop();
     _recordTimer?.cancel();
     _fadeController.dispose();
     _rotationController.dispose();
@@ -235,7 +262,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                     ),
                   ),
                 ),
-                const AppIconBadge(),
+                AppIconBadge(isSpeaking: _isSpeaking),
               ],
             ),
           ),
