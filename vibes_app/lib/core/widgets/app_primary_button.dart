@@ -25,9 +25,7 @@ class AppPrimaryButton extends StatelessWidget {
         fontWeight: FontWeight.w500,
         letterSpacing: -0.36,
         height: 24 / 18,
-      ).copyWith(
-        color: enabled ? AppColors.textPrimary : AppColors.textMuted,
-      ),
+      ).copyWith(color: enabled ? AppColors.background : AppColors.textMuted),
     );
 
     return GestureDetector(
