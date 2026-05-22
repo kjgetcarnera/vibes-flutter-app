@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/services/location_service.dart';
@@ -21,6 +22,10 @@ class _UserInfoScreenState extends State<UserInfoScreen>
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+
+  final FlutterTts _tts = FlutterTts();
+  bool _ttsDisposed = false;
+  bool _isSpeaking = false;
 
   final _firstNameController = TextEditingController();
   final _ageController = TextEditingController();
@@ -55,10 +60,30 @@ class _UserInfoScreenState extends State<UserInfoScreen>
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
     _firstNameController.addListener(() => setState(() {}));
     _ageController.addListener(() => setState(() {}));
+    _speakIntro();
+  }
+
+  Future<void> _speakIntro() async {
+    await _tts.setLanguage('en-US');
+    if (_ttsDisposed) return;
+    await _tts.setSpeechRate(0.35);
+    if (_ttsDisposed) return;
+    _tts.setStartHandler(() {
+      if (!_ttsDisposed) setState(() => _isSpeaking = true);
+    });
+    _tts.setCompletionHandler(() {
+      if (!_ttsDisposed) setState(() => _isSpeaking = false);
+    });
+    _tts.setCancelHandler(() {
+      if (!_ttsDisposed) setState(() => _isSpeaking = false);
+    });
+    await _tts.speak('Tell us about yourself. Just two things to get started.');
   }
 
   @override
   void dispose() {
+    _ttsDisposed = true;
+    _tts.stop();
     _fadeController.dispose();
     _firstNameController.dispose();
     _ageController.dispose();
@@ -154,7 +179,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                       children: [
                         Align(
                           alignment: Alignment.centerRight,
-                          child: AppIconBadge(),
+                          child: AppIconBadge(isSpeaking: _isSpeaking),
                         ),
                         const SizedBox(height: 10),
                         Text(
