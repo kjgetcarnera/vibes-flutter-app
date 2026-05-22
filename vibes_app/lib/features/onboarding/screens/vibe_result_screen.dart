@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 // ignore_for_file: avoid_print
 import 'package:flutter/services.dart';
@@ -208,15 +209,11 @@ class _VibeResultScreenState extends State<VibeResultScreen>
                           _FrequencyScoreCard(result: r),
                           const SizedBox(height: 24),
 
-                          // Playback card
-                          // _PlaybackCard(
-                          //   isPlaying: _playerState == PlayerState.playing,
-                          //   position: _position,
-                          //   duration: _duration,
-                          //   onTap: _togglePlayback,
-                          //   formatDuration: _formatDuration,
-                          // ),
-                          // const SizedBox(height: 32),
+                          // Recommended audio carousel
+                          if (r.recommendedAudios.isNotEmpty) ...[
+                            _AudioCarousel(audios: r.recommendedAudios),
+                            const SizedBox(height: 24),
+                          ],
 
                           // Re-record
                           GestureDetector(
@@ -300,9 +297,7 @@ class _VibeResultScreenState extends State<VibeResultScreen>
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  const AppIconBadge(),
-                ],
+                children: [const AppIconBadge()],
               ),
             ),
           ),
@@ -803,6 +798,312 @@ Color? _parseColor(String? hex) {
     return value != null ? Color(value) : null;
   }
   return null;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Audio Track Carousel
+// ─────────────────────────────────────────────────────────────
+class _AudioCarousel extends StatefulWidget {
+  const _AudioCarousel({required this.audios});
+  final List<RecommendedAudio> audios;
+
+  @override
+  State<_AudioCarousel> createState() => _AudioCarouselState();
+}
+
+class _AudioCarouselState extends State<_AudioCarousel> {
+  final AudioPlayer _player = AudioPlayer();
+  final PageController _pageController = PageController(viewportFraction: 0.88);
+
+  int _currentPage = 0;
+  int? _playingId;
+  PlayerState _playerState = PlayerState.stopped;
+  Duration _position = Duration.zero;
+  Duration _duration = Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _player.onPlayerStateChanged.listen((s) {
+      if (mounted) setState(() => _playerState = s);
+      if (s == PlayerState.completed && mounted) {
+        setState(() {
+          _playingId = null;
+          _position = Duration.zero;
+        });
+      }
+    });
+    _player.onPositionChanged.listen((p) {
+      if (mounted) setState(() => _position = p);
+    });
+    _player.onDurationChanged.listen((d) {
+      if (mounted) setState(() => _duration = d);
+    });
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _togglePlay(RecommendedAudio audio) async {
+    if (_playingId == audio.id) {
+      if (_playerState == PlayerState.playing) {
+        await _player.pause();
+      } else {
+        await _player.resume();
+      }
+    } else {
+      await _player.stop();
+      setState(() {
+        _playingId = audio.id;
+        _position = Duration.zero;
+        _duration = Duration.zero;
+      });
+      await _player.play(UrlSource(audio.audioUrl));
+    }
+  }
+
+  String _fmt(Duration d) {
+    final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.audios.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 12),
+          child: Text(
+            "Let’s change that:",
+            style: const TextStyle(
+              fontFamily: 'PPSupplyMono',
+              fontSize: 22,
+              fontWeight: FontWeight.w300,
+              color: Color(0xFFFFFFFE),
+              letterSpacing: -0.48,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 180,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: widget.audios.length,
+            onPageChanged: (i) => setState(() => _currentPage = i),
+            itemBuilder: (context, i) {
+              final audio = widget.audios[i];
+              final isActive = _playingId == audio.id;
+              final isPlaying = isActive && _playerState == PlayerState.playing;
+              final progress = isActive && _duration.inMilliseconds > 0
+                  ? (_position.inMilliseconds / _duration.inMilliseconds).clamp(
+                      0.0,
+                      1.0,
+                    )
+                  : 0.0;
+
+              return AnimatedScale(
+                scale: _currentPage == i ? 1.0 : 0.95,
+                duration: const Duration(milliseconds: 300),
+                child: Container(
+                  margin: const EdgeInsets.only(right: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0D0F12),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withAlpha(isActive ? 40 : 18),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      // Cover image
+                      ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(15),
+                          bottomLeft: Radius.circular(15),
+                        ),
+                        child: Image.network(
+                          audio.coverImageUrl,
+                          width: 130,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            width: 130,
+                            color: AppColors.knobCenter,
+                            child: const Icon(
+                              Icons.music_note,
+                              color: AppColors.textMuted,
+                              size: 32,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Info + controls
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'TRACK',
+                                style: const TextStyle(
+                                  fontFamily: 'PPSupplyMono',
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0x80939AA6),
+                                  letterSpacing: 1.4,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                audio.name,
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: -0.3,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                audio.subtitle,
+                                style: const TextStyle(
+                                  fontFamily: 'PPSupplyMono',
+                                  fontSize: 10,
+                                  color: Color(0xB3FFFEFE),
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const Spacer(),
+                              // Waveform progress bar
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(3),
+                                child: LinearProgressIndicator(
+                                  value: progress.toDouble(),
+                                  backgroundColor: Colors.white.withAlpha(20),
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                        AppColors.accentCyan,
+                                      ),
+                                  minHeight: 3,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  // Play/pause button
+                                  GestureDetector(
+                                    onTap: () => _togglePlay(audio),
+                                    child: Container(
+                                      width: 36,
+                                      height: 36,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        gradient: isActive
+                                            ? AppColors.accentGradient
+                                            : null,
+                                        color: isActive
+                                            ? null
+                                            : AppColors.knobCenter,
+                                        border: isActive
+                                            ? null
+                                            : Border.all(
+                                                color: AppColors.knobOuter,
+                                                width: 1,
+                                              ),
+                                      ),
+                                      child: Icon(
+                                        isPlaying
+                                            ? Icons.pause
+                                            : Icons.play_arrow,
+                                        color: isActive
+                                            ? Colors.black
+                                            : AppColors.textSecondary,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Time
+                                  Text(
+                                    isActive
+                                        ? '${_fmt(_position)} | ${_fmt(_duration)}'
+                                        : '00:00',
+                                    style: const TextStyle(
+                                      fontFamily: 'PPSupplyMono',
+                                      fontSize: 9,
+                                      color: Color(0x80939AA6),
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Dot indicators
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(widget.audios.length, (i) {
+            final active = i == _currentPage;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              width: active ? 20 : 6,
+              height: 6,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                gradient: active
+                    ? const LinearGradient(
+                        colors: [Color(0xFF2FE17A), Color(0xFF00FFF7)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      )
+                    : null,
+                color: active ? Color(0xFF2FE17A) : Colors.white.withAlpha(40),
+              ),
+            );
+          }),
+        ),
+        const SizedBox(height: 15),
+        Padding(
+          padding: const EdgeInsets.only(left: 25, right: 10),
+          child: Text(
+            "After, we’ll check in again.You’ll hear how your voice shifted from wired to grounded. ",
+            style: const TextStyle(
+              fontFamily: 'PPSupplyMono',
+              fontSize: 18,
+              fontWeight: FontWeight.w300,
+              color: Color(0xFFFFFFFE),
+              letterSpacing: -0.4,
+            ),
+            textAlign: TextAlign.left,
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 /// Converts snake_case or hyphen-case state strings to Title Case.

@@ -65,6 +65,11 @@ class _VibeLoadingScreenState extends State<VibeLoadingScreen>
       result = VibeCheckResult.mock();
     }
 
+    // Backend hasn't deployed recommended_audios yet — fall back to test data.
+    if (result.recommendedAudios.isEmpty) {
+      result = VibeCheckResult.mock().copyWithResult(result);
+    }
+
     // Ensure at least 2 seconds of loading feel
     await Future.delayed(const Duration(seconds: 2));
 
