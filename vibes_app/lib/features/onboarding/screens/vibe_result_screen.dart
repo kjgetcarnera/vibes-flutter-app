@@ -197,9 +197,17 @@ class _VibeResultScreenState extends State<VibeResultScreen>
                           // Header
                           Text(
                             'Okay ${widget.firstName},\nHere\'s what I\'m hearing:',
-                            style: AppTextStyles.displayLarge,
+                            style: const TextStyle(
+                              fontFamily: 'PPSupplyMono',
+                              fontSize: 24,
+                              fontStyle: FontStyle.normal,
+                              fontWeight: FontWeight.w300,
+                              height: 34 / 24,
+                              letterSpacing: -0.48,
+                              color: Colors.white,
+                            ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 20),
 
                           // Brain Readiness card
                           _BrainReadinessCard(result: r),
@@ -212,7 +220,7 @@ class _VibeResultScreenState extends State<VibeResultScreen>
                           // Recommended audio carousel
                           if (r.recommendedAudios.isNotEmpty) ...[
                             _AudioCarousel(audios: r.recommendedAudios),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 30),
                           ],
 
                           // Re-record
@@ -222,19 +230,15 @@ class _VibeResultScreenState extends State<VibeResultScreen>
                               width: double.infinity,
                               height: 50,
                               decoration: BoxDecoration(
-                                color: Colors.transparent,
+                                gradient: AppColors.accentGradient,
                                 borderRadius: BorderRadius.circular(30),
-                                border: Border.all(
-                                  color: Colors.white.withAlpha(40),
-                                  width: 1,
-                                ),
                               ),
                               alignment: Alignment.center,
                               child: Text(
                                 'Re-record',
                                 style: AppTextStyles.kamerikToggle.copyWith(
                                   fontSize: 16,
-                                  color: AppColors.textSecondary,
+                                  color: AppColors.background,
                                 ),
                               ),
                             ),
@@ -960,31 +964,33 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                                   const Text(
                                     'TRACK',
                                     style: TextStyle(
-                                      fontFamily: 'PPSupplyMono',
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0x80939AA6),
-                                      letterSpacing: 1.6,
+                                      fontFamily: 'Kamerik105',
+                                      fontSize: 10,
+                                      fontStyle: FontStyle.normal,
+                                      fontWeight: FontWeight.w700,
+                                      height: 24 / 10,
+                                      letterSpacing: 0.2,
+                                      color: Color(0xFF646464),
                                     ),
                                   ),
                                   const Spacer(),
-                                  Container(
-                                    width: 28,
-                                    height: 28,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: AppColors.knobCenter,
-                                      border: Border.all(
-                                        color: AppColors.knobOuter,
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.ios_share,
-                                      color: AppColors.textSecondary,
-                                      size: 13,
-                                    ),
-                                  ),
+                                  // Container(
+                                  //   width: 28,
+                                  //   height: 28,
+                                  //   decoration: BoxDecoration(
+                                  //     shape: BoxShape.circle,
+                                  //     color: AppColors.knobCenter,
+                                  //     border: Border.all(
+                                  //       color: AppColors.knobOuter,
+                                  //       width: 1,
+                                  //     ),
+                                  //   ),
+                                  //   child: const Icon(
+                                  //     Icons.ios_share,
+                                  //     color: AppColors.textSecondary,
+                                  //     size: 13,
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                               const SizedBox(height: 5),
@@ -992,11 +998,14 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                               // Track name
                               Text(
                                 audio.name,
-                                style: GoogleFonts.inter(
-                                  fontSize: 17,
+                                style: const TextStyle(
+                                  fontFamily: 'Kamerik105',
+                                  fontSize: 16,
+                                  fontStyle: FontStyle.normal,
                                   fontWeight: FontWeight.w700,
+                                  height: 24 / 16,
+                                  letterSpacing: 0.4,
                                   color: Colors.white,
-                                  letterSpacing: -0.4,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1007,9 +1016,13 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                               Text(
                                 audio.subtitle,
                                 style: const TextStyle(
-                                  fontFamily: 'PPSupplyMono',
+                                  fontFamily: 'Kamerik105',
                                   fontSize: 10,
-                                  color: Color(0xB3939AA6),
+                                  fontStyle: FontStyle.normal,
+                                  fontWeight: FontWeight.w400,
+                                  height: 24 / 10,
+                                  letterSpacing: 0.2,
+                                  color: Colors.white,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1083,8 +1096,9 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                                           style: const TextStyle(
                                             fontFamily: 'PPSupplyMono',
                                             fontSize: 8,
-                                            color: Color(0x80939AA6),
-                                            letterSpacing: 0.3,
+                                            color: Color(0xFF939AA6),
+                                            letterSpacing: 0.16,
+                                            fontWeight: FontWeight.w400,
                                           ),
                                         ),
                                       ],
