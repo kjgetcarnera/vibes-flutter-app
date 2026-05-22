@@ -80,10 +80,11 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
       duration: const Duration(milliseconds: 3000),
     );
 
-    _speakIntro();
+    Future.delayed(const Duration(milliseconds: 1000), _speakIntro);
   }
 
   Future<void> _speakIntro() async {
+    if (_ttsDisposed) return;
     await _tts.setLanguage('en-US');
     if (_ttsDisposed) return;
     await _tts.setSpeechRate(0.35);

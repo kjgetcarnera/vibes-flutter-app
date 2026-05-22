@@ -11,18 +11,25 @@ import '../../../core/models/vibe_check_result.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/widgets/app_icon_badge.dart';
 import '../../auth/screens/auth_screen.dart';
+import 'read_passage_screen.dart';
 
 class VibeResultScreen extends StatefulWidget {
   const VibeResultScreen({
     super.key,
     required this.firstName,
+    required this.age,
     required this.audioFile,
     required this.result,
+    this.latitude,
+    this.longitude,
   });
 
   final String firstName;
+  final int age;
   final File audioFile;
   final VibeCheckResult result;
+  final double? latitude;
+  final double? longitude;
 
   @override
   State<VibeResultScreen> createState() => _VibeResultScreenState();
@@ -71,6 +78,22 @@ class _VibeResultScreenState extends State<VibeResultScreen>
     _fadeController.dispose();
     // _player.dispose();
     super.dispose();
+  }
+
+  void _reRecord() {
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => ReadPassageScreen(
+          firstName: widget.firstName,
+          age: widget.age,
+          latitude: widget.latitude,
+          longitude: widget.longitude,
+        ),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 400),
+      ),
+    );
   }
 
   Future<void> _logout() async {
@@ -195,6 +218,32 @@ class _VibeResultScreenState extends State<VibeResultScreen>
                           // ),
                           // const SizedBox(height: 32),
 
+                          // Re-record
+                          GestureDetector(
+                            onTap: _reRecord,
+                            child: Container(
+                              width: double.infinity,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(30),
+                                border: Border.all(
+                                  color: Colors.white.withAlpha(40),
+                                  width: 1,
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Re-record',
+                                style: AppTextStyles.kamerikToggle.copyWith(
+                                  fontSize: 16,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
                           // Logout
                           GestureDetector(
                             onTap: _logout,
@@ -250,28 +299,8 @@ class _VibeResultScreenState extends State<VibeResultScreen>
                 ),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.knobCenter,
-                        border: Border.all(
-                          color: AppColors.knobOuter,
-                          width: 1,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.chevron_left,
-                        color: AppColors.textSecondary,
-                        size: 22,
-                      ),
-                    ),
-                  ),
                   const AppIconBadge(),
                 ],
               ),
@@ -292,7 +321,8 @@ class _BrainReadinessCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c1 = _parseColor(result.brainReadinessColors.firstOrNull) ??
+    final c1 =
+        _parseColor(result.brainReadinessColors.firstOrNull) ??
         const Color(0xFFF9DF17);
     final c2 = result.brainReadinessColors.length > 1
         ? (_parseColor(result.brainReadinessColors[1]) ?? c1)

@@ -60,10 +60,11 @@ class _UserInfoScreenState extends State<UserInfoScreen>
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
     _firstNameController.addListener(() => setState(() {}));
     _ageController.addListener(() => setState(() {}));
-    _speakIntro();
+    Future.delayed(const Duration(milliseconds: 1000), _speakIntro);
   }
 
   Future<void> _speakIntro() async {
+    if (_ttsDisposed) return;
     await _tts.setLanguage('en-US');
     if (_ttsDisposed) return;
     await _tts.setSpeechRate(0.35);

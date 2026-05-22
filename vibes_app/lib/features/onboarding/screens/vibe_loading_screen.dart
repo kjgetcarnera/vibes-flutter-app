@@ -73,8 +73,11 @@ class _VibeLoadingScreenState extends State<VibeLoadingScreen>
       PageRouteBuilder(
         pageBuilder: (_, __, ___) => VibeResultScreen(
           firstName: widget.firstName,
+          age: widget.age,
           audioFile: widget.audioFile,
           result: result,
+          latitude: widget.latitude,
+          longitude: widget.longitude,
         ),
         transitionsBuilder: (_, anim, __, child) =>
             FadeTransition(opacity: anim, child: child),
