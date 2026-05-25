@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:audio_session/audio_session.dart' as audio_session;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 // ignore_for_file: avoid_print
@@ -828,6 +829,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
   @override
   void initState() {
     super.initState();
+    _configureAudioSession();
     _player.onPlayerStateChanged.listen((s) {
       if (mounted) setState(() => _playerState = s);
       if (s == PlayerState.completed && mounted) {
@@ -850,6 +852,24 @@ class _AudioCarouselState extends State<_AudioCarousel> {
     _player.dispose();
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _configureAudioSession() async {
+    final session = await audio_session.AudioSession.instance;
+    await session.configure(audio_session.AudioSessionConfiguration(
+      avAudioSessionCategory: audio_session.AVAudioSessionCategory.playback,
+      avAudioSessionCategoryOptions: audio_session.AVAudioSessionCategoryOptions.defaultToSpeaker,
+      avAudioSessionMode: audio_session.AVAudioSessionMode.defaultMode,
+      avAudioSessionRouteSharingPolicy: audio_session.AVAudioSessionRouteSharingPolicy.defaultPolicy,
+      avAudioSessionSetActiveOptions: audio_session.AVAudioSessionSetActiveOptions.none,
+      androidAudioAttributes: const audio_session.AndroidAudioAttributes(
+        contentType: audio_session.AndroidAudioContentType.music,
+        flags: audio_session.AndroidAudioFlags.none,
+        usage: audio_session.AndroidAudioUsage.media,
+      ),
+      androidAudioFocusGainType: audio_session.AndroidAudioFocusGainType.gain,
+      androidWillPauseWhenDucked: true,
+    ));
   }
 
   Future<void> _togglePlay(RecommendedAudio audio) async {
