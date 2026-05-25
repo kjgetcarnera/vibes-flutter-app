@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:audio_session/audio_session.dart' as audio_session;
+import 'package:audio_service/audio_service.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 // ignore_for_file: avoid_print
@@ -10,6 +10,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/models/vibe_check_result.dart';
+import '../../../core/services/audio_service_manager.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/widgets/app_icon_badge.dart';
 import '../../auth/screens/auth_screen.dart';
@@ -817,7 +818,12 @@ class _AudioCarousel extends StatefulWidget {
 }
 
 class _AudioCarouselState extends State<_AudioCarousel> {
-  final AudioPlayer _player = AudioPlayer();
+  // Audio is now routed through VibesAudioHandler so the OS shows lock screen
+  // controls (thumbnail, progress, play/pause/stop) on both iOS and Android.
+  // The raw AudioPlayer inside the handler still drives all playback — nothing
+  // about the audio behaviour has changed, only the OS media session is added.
+  late final _handler = AudioServiceManager.instance.handler;
+
   final PageController _pageController = PageController(viewportFraction: 0.88);
 
   int _currentPage = 0;
@@ -829,64 +835,67 @@ class _AudioCarouselState extends State<_AudioCarousel> {
   @override
   void initState() {
     super.initState();
-    _configureAudioSession();
-    _player.onPlayerStateChanged.listen((s) {
-      if (mounted) setState(() => _playerState = s);
-      if (s == PlayerState.completed && mounted) {
+
+    _handler.playerStateStream.listen((s) {
+      if (!mounted) return;
+      setState(() => _playerState = s);
+      if (s == PlayerState.completed) {
         setState(() {
           _playingId = null;
           _position = Duration.zero;
         });
       }
     });
-    _player.onPositionChanged.listen((p) {
+    _handler.positionStream.listen((p) {
       if (mounted) setState(() => _position = p);
     });
-    _player.onDurationChanged.listen((d) {
+    _handler.durationStream.listen((d) {
       if (mounted) setState(() => _duration = d);
+    });
+    // When the user taps Stop on the lock screen / notification, clear the
+    // active-track indicator in the UI so it stays in sync.
+    _handler.onExternalStop.listen((_) {
+      if (mounted) {
+        setState(() {
+          _playingId = null;
+          _position = Duration.zero;
+          _duration = Duration.zero;
+          _playerState = PlayerState.stopped;
+        });
+      }
     });
   }
 
   @override
   void dispose() {
-    _player.dispose();
     _pageController.dispose();
     super.dispose();
-  }
-
-  Future<void> _configureAudioSession() async {
-    final session = await audio_session.AudioSession.instance;
-    await session.configure(audio_session.AudioSessionConfiguration(
-      avAudioSessionCategory: audio_session.AVAudioSessionCategory.playback,
-      avAudioSessionCategoryOptions: audio_session.AVAudioSessionCategoryOptions.defaultToSpeaker,
-      avAudioSessionMode: audio_session.AVAudioSessionMode.defaultMode,
-      avAudioSessionRouteSharingPolicy: audio_session.AVAudioSessionRouteSharingPolicy.defaultPolicy,
-      avAudioSessionSetActiveOptions: audio_session.AVAudioSessionSetActiveOptions.none,
-      androidAudioAttributes: const audio_session.AndroidAudioAttributes(
-        contentType: audio_session.AndroidAudioContentType.music,
-        flags: audio_session.AndroidAudioFlags.none,
-        usage: audio_session.AndroidAudioUsage.media,
-      ),
-      androidAudioFocusGainType: audio_session.AndroidAudioFocusGainType.gain,
-      androidWillPauseWhenDucked: true,
-    ));
   }
 
   Future<void> _togglePlay(RecommendedAudio audio) async {
     if (_playingId == audio.id) {
       if (_playerState == PlayerState.playing) {
-        await _player.pause();
+        await _handler.pause();
       } else {
-        await _player.resume();
+        await _handler.play();
       }
     } else {
-      await _player.stop();
       setState(() {
         _playingId = audio.id;
         _position = Duration.zero;
         _duration = Duration.zero;
       });
-      await _player.play(UrlSource(audio.audioUrl));
+      await _handler.playAudio(
+        item: MediaItem(
+          id: audio.id.toString(),
+          title: audio.name,
+          artist: audio.subtitle,
+          artUri: audio.coverImageUrl.isNotEmpty
+              ? Uri.tryParse(audio.coverImageUrl)
+              : null,
+        ),
+        audioUrl: audio.audioUrl,
+      );
     }
   }
 
