@@ -839,17 +839,21 @@ class _AudioCarouselState extends State<_AudioCarousel> {
 
     // Register full playlist with the handler so lock screen next/prev work
     _handler.loadQueue(
-      widget.audios.map((a) => QueueEntry(
-        item: MediaItem(
-          id: a.id.toString(),
-          title: a.name,
-          artist: a.subtitle,
-          artUri: a.coverImageUrl.isNotEmpty
-              ? Uri.tryParse(a.coverImageUrl)
-              : null,
-        ),
-        audioUrl: a.audioUrl,
-      )).toList(),
+      widget.audios
+          .map(
+            (a) => QueueEntry(
+              item: MediaItem(
+                id: a.id.toString(),
+                title: a.name,
+                artist: a.subtitle,
+                artUri: a.coverImageUrl.isNotEmpty
+                    ? Uri.tryParse(a.coverImageUrl)
+                    : null,
+              ),
+              audioUrl: a.audioUrl,
+            ),
+          )
+          .toList(),
     );
 
     _handler.playerStateStream.listen((s) {
@@ -900,6 +904,10 @@ class _AudioCarouselState extends State<_AudioCarousel> {
 
   @override
   void dispose() {
+    // Stop audio when leaving the screen (back, re-record, logout).
+    // Does NOT affect background/lock screen — dispose is only called on
+    // navigation, not when the app moves to the background.
+    _handler.stop();
     _pageController.dispose();
     super.dispose();
   }
