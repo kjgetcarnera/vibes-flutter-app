@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:audio_service/audio_service.dart';
 import 'package:audioplayers/audioplayers.dart';
+import '../../../core/services/vibes_audio_handler.dart';
 import 'package:flutter/material.dart';
 // ignore_for_file: avoid_print
 import 'package:flutter/services.dart';
@@ -836,6 +837,21 @@ class _AudioCarouselState extends State<_AudioCarousel> {
   void initState() {
     super.initState();
 
+    // Register full playlist with the handler so lock screen next/prev work
+    _handler.loadQueue(
+      widget.audios.map((a) => QueueEntry(
+        item: MediaItem(
+          id: a.id.toString(),
+          title: a.name,
+          artist: a.subtitle,
+          artUri: a.coverImageUrl.isNotEmpty
+              ? Uri.tryParse(a.coverImageUrl)
+              : null,
+        ),
+        audioUrl: a.audioUrl,
+      )).toList(),
+    );
+
     _handler.playerStateStream.listen((s) {
       if (!mounted) return;
       setState(() => _playerState = s);
@@ -851,6 +867,22 @@ class _AudioCarouselState extends State<_AudioCarousel> {
     });
     _handler.durationStream.listen((d) {
       if (mounted) setState(() => _duration = d);
+    });
+    // Sync UI when user taps next/previous on the lock screen
+    _handler.onSkip.listen((index) {
+      if (!mounted) return;
+      final audio = widget.audios[index];
+      setState(() {
+        _playingId = audio.id;
+        _currentPage = index;
+        _position = Duration.zero;
+        _duration = Duration.zero;
+      });
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     });
     // When the user taps Stop on the lock screen / notification, clear the
     // active-track indicator in the UI so it stays in sync.
@@ -880,22 +912,14 @@ class _AudioCarouselState extends State<_AudioCarousel> {
         await _handler.play();
       }
     } else {
+      final index = widget.audios.indexWhere((a) => a.id == audio.id);
+      if (index == -1) return;
       setState(() {
         _playingId = audio.id;
         _position = Duration.zero;
         _duration = Duration.zero;
       });
-      await _handler.playAudio(
-        item: MediaItem(
-          id: audio.id.toString(),
-          title: audio.name,
-          artist: audio.subtitle,
-          artUri: audio.coverImageUrl.isNotEmpty
-              ? Uri.tryParse(audio.coverImageUrl)
-              : null,
-        ),
-        audioUrl: audio.audioUrl,
-      );
+      await _handler.playAudio(index: index);
     }
   }
 
