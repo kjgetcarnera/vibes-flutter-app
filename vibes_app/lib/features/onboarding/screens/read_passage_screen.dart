@@ -13,10 +13,62 @@ import '../../../core/widgets/app_icon_badge.dart';
 import '../../../core/widgets/mic_permission_guard.dart';
 import 'vibe_loading_screen.dart';
 
-const _passage =
-    'My voice shows my brain.\nMy brain responds to sound.\nSound changes my state.\n\n'
-    'I can measure it. I can restore it. I can prove it changed. This is how I\n'
-    'take care of my brain. And where ever I am today -- I am enough.';
+class _Passage {
+  const _Passage({
+    required this.title,
+    required this.author,
+    required this.text,
+    required this.footer,
+  });
+  final String title;
+  final String author;
+  final String text;
+  final String footer;
+}
+
+const _passages = [
+  _Passage(
+    title: 'Still I Rise',
+    author: '— Maya Angelou',
+    text:
+        'You may write me down in history\nWith your bitter, twisted lies,\n'
+        'You may trod me in the very dirt\nBut still, like dust, I\'ll rise.\n\n'
+        'Out of the huts of history\'s shame I rise\n'
+        'Up from a past that\'s rooted in pain I rise\n'
+        'Bringing the gifts that my ancestors gave,\n'
+        'I am the dream and the hope of the slave.\n'
+        'I rise. I rise. I rise.',
+    footer: 'Excerpt — full poem at poets.org',
+  ),
+  _Passage(
+    title: 'I\'m in a Vibes State of Mind',
+    author: '— Joanna Pena Bickley',
+    text:
+        'Today, I reclaim my attention as sacred.\n'
+        'I turn away from the noise that scatters my mind,\n'
+        'and return to the quiet center of my own breath and voice.\n\n'
+        'I am the authentic intelligence — channeling the ancestral\n'
+        'intelligence of voice and sound to build a world that works\n'
+        'for everyone, everywhere, every day.\n'
+        'My voice is not small. Every word I speak,\n'
+        'every tone I carry, is a vibration that shapes my world.\n\n'
+        'May my voice be a vital sign of my wholeness.\n'
+        'For the gift of this breath, this brain, this day — thank you.',
+    footer: 'Original MANTRA passage',
+  ),
+  _Passage(
+    title: 'Signal',
+    author: '— VAIA × Vibes AI',
+    text:
+        'My voice is data.\nMy data is truth.\n'
+        'This brain — right now —\nis doing something extraordinary just to get me here.\n\n'
+        'I don\'t need to perform.\nI don\'t need to optimize.\nI just need to speak.\n\n'
+        'Every Hz I carry is a story.\n'
+        'Every pause, every breath, every hesitation\nis signal, not noise.\n\n'
+        'I am not broken. I am transmitting.\nAnd today, I choose to listen back.',
+    footer: 'Original passage – written for MANTRA',
+  ),
+];
 
 class ReadPassageScreen extends StatefulWidget {
   const ReadPassageScreen({
@@ -47,12 +99,15 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
   bool _ttsDisposed = false;
   bool _isSpeaking = false;
 
+  int _passageIndex = 0;
+  bool _recordingStarted = false;
+
   final AudioRecorder _recorder = AudioRecorder();
   bool _isRecording = false;
   bool _isPaused = false;
   bool _isSubmitting = false;
 
-  static const int _minRecordSeconds = 20;
+  static const int _minRecordSeconds = 30;
   int _activeRecordSeconds = 0;
   Timer? _recordTimer;
 
@@ -92,16 +147,15 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
     _tts.setStartHandler(() {
       if (!_ttsDisposed) setState(() => _isSpeaking = true);
     });
-    _tts.setCompletionHandler(() async {
-      if (_ttsDisposed) return;
-      setState(() => _isSpeaking = false);
-      await Future.delayed(const Duration(seconds: 1));
-      if (!_ttsDisposed && mounted) _startRecording();
+    _tts.setCompletionHandler(() {
+      if (!_ttsDisposed) setState(() => _isSpeaking = false);
     });
     _tts.setCancelHandler(() {
       if (!_ttsDisposed) setState(() => _isSpeaking = false);
     });
-    await _tts.speak('Read this passage out loud.');
+    await _tts.speak(
+      "When you are ready - click the start recording button and Read this passage aloud - at your natural pace. no performance — just your voice, right now.",
+    );
   }
 
   @override
@@ -280,22 +334,96 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'READ THIS PASSAGE OUTLOUD',
-                        style: AppTextStyles.caption.copyWith(
-                          letterSpacing: 1.2,
+                      // Header label
+                      ShaderMask(
+                        shaderCallback: (bounds) =>
+                            AppColors.accentGradient2.createShader(bounds),
+                        child: Text(
+                          'VOICE READING',
+                          style: AppTextStyles.labelSmall.copyWith(
+                            color: Colors.white,
+                            letterSpacing: 1.5,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
                       Text(
-                        _passage,
+                        'read aloud at your natural pace. no performance — just your voice, right now.',
+                        style: AppTextStyles.bodyMono.copyWith(height: 1.6),
+                      ),
+                      const SizedBox(height: 24),
+                      // Passage title row
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _passages[_passageIndex].title,
+                                  style: AppTextStyles.headingBold.copyWith(
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _passages[_passageIndex].author,
+                                  style: AppTextStyles.bodyMono.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Swap button — only when not recording
+                          if (!_recordingStarted)
+                            GestureDetector(
+                              onTap: () => setState(
+                                () => _passageIndex =
+                                    (_passageIndex + 1) % _passages.length,
+                              ),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.knobCenter,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: AppColors.knobOuter,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  'swap',
+                                  style: AppTextStyles.bodyMono.copyWith(
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      // Passage text
+                      Text(
+                        _passages[_passageIndex].text,
                         style: const TextStyle(
                           color: Color(0xFFFFFFFF),
                           fontFamily: 'SF Pro Display',
                           fontSize: 24,
-                          fontStyle: FontStyle.normal,
                           fontWeight: FontWeight.w400,
                           height: 40 / 24,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Footer note
+                      Text(
+                        _passages[_passageIndex].footer,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textMuted,
                         ),
                       ),
                     ],
@@ -305,7 +433,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
             ),
           ),
 
-          // ── Record bar ──
+          // ── Bottom bar ──
           Container(
             decoration: BoxDecoration(
               color: AppColors.background,
@@ -313,7 +441,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                 top: BorderSide(color: Colors.white.withAlpha(15), width: 1),
               ),
             ),
-            padding: const EdgeInsets.fromLTRB(24, 14, 24, 14),
+            padding: EdgeInsets.fromLTRB(24, 14, 24, bottomPad + 14),
             child: _isSubmitting
                 ? const Center(
                     child: SizedBox(
@@ -325,92 +453,131 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                       ),
                     ),
                   )
-                : Row(
+                : !_recordingStarted
+                // "start recording" button
+                ? GestureDetector(
+                    onTap: () {
+                      setState(() => _recordingStarted = true);
+                      _startRecording();
+                    },
+                    child: Container(
+                      height: 52,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.accentGradient,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'start recording',
+                        style: TextStyle(
+                          fontFamily: 'Kamerik105',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: -0.36,
+                          color: AppColors.background,
+                        ),
+                      ),
+                    ),
+                  )
+                // Record controls bar + rotating VAIA below
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 400),
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _isRecording && !_isPaused
-                              ? const Color(0xFFFF2D87)
-                              : AppColors.textMuted,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          _isRecording
-                              ? (_isPaused ? 'Paused' : 'VAIA is listening...')
-                              : 'Starting mic...',
-                          style: AppTextStyles.bodyMono,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: _isRecording ? _togglePause : null,
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          margin: const EdgeInsets.only(right: 12),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.knobCenter,
-                            border: Border.all(
-                              color: AppColors.knobOuter,
-                              width: 1,
+                      Row(
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 400),
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _isRecording && !_isPaused
+                                  ? const Color(0xFFFF2D87)
+                                  : AppColors.textMuted,
                             ),
                           ),
-                          child: Icon(
-                            _isPaused ? Icons.play_arrow : Icons.pause,
-                            color: _isRecording
-                                ? AppColors.textPrimary
-                                : AppColors.textMuted,
-                            size: 20,
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              _isRecording
+                                  ? (_isPaused
+                                        ? 'Paused'
+                                        : 'VAIA is listening...')
+                                  : 'Starting mic...',
+                              style: AppTextStyles.bodyMono,
+                            ),
                           ),
+                          GestureDetector(
+                            onTap: _isRecording ? _togglePause : null,
+                            child: Container(
+                              width: 44,
+                              height: 44,
+                              margin: const EdgeInsets.only(right: 12),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.knobCenter,
+                                border: Border.all(
+                                  color: AppColors.knobOuter,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Icon(
+                                _isPaused ? Icons.play_arrow : Icons.pause,
+                                color: _isRecording
+                                    ? AppColors.textPrimary
+                                    : AppColors.textMuted,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: _canSubmit ? _stopAndSubmit : null,
+                            child: Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: _canSubmit
+                                    ? AppColors.accentGradient
+                                    : null,
+                                color: _canSubmit ? null : AppColors.knobCenter,
+                              ),
+                              child: Icon(
+                                Icons.check,
+                                color: _canSubmit
+                                    ? Colors.black
+                                    : AppColors.textMuted,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'aim for 30-60 seconds',
+                        style: AppTextStyles.bodyMono.copyWith(
+                          color: AppColors.textSecondary,
                         ),
                       ),
-                      GestureDetector(
-                        onTap: _canSubmit ? _stopAndSubmit : null,
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: _canSubmit
-                                ? AppColors.accentGradient
-                                : null,
-                            color: _canSubmit ? null : AppColors.knobCenter,
-                          ),
-                          child: Icon(
-                            Icons.check,
-                            color: _canSubmit
-                                ? Colors.black
-                                : AppColors.textMuted,
-                            size: 20,
-                          ),
+                      const SizedBox(height: 12),
+                      // Rotating VAIA image
+                      AnimatedBuilder(
+                        animation: _rotationController,
+                        builder: (_, child) => Transform.rotate(
+                          angle:
+                              _rotationController.value * 2 * 3.141592653589793,
+                          child: child,
+                        ),
+                        child: Image.asset(
+                          'assets/images/VAIA.png',
+                          width: 72,
+                          height: 72,
+                          fit: BoxFit.contain,
                         ),
                       ),
                     ],
                   ),
-          ),
-
-          // ── VAIA rotating image ──
-          Padding(
-            padding: EdgeInsets.only(top: 16, bottom: bottomPad + 20),
-            child: AnimatedBuilder(
-              animation: _rotationController,
-              builder: (_, child) => Transform.rotate(
-                angle: _rotationController.value * 2 * 3.141592653589793,
-                child: child,
-              ),
-              child: Image.asset(
-                'assets/images/VAIA.png',
-                width: 72,
-                height: 72,
-                fit: BoxFit.contain,
-              ),
-            ),
           ),
         ],
       ),

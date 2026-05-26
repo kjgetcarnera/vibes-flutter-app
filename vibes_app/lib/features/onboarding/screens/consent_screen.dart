@@ -98,7 +98,7 @@ class _ConsentScreenState extends State<ConsentScreen>
       if (!_ttsDisposed) setState(() => _isSpeaking = false);
     });
     await _tts.speak(
-      'Before we begin. tick each box to confirm you understand.',
+      'Before we begin - tick each box to confirm you understand.',
     );
   }
 
@@ -201,7 +201,10 @@ class _ConsentScreenState extends State<ConsentScreen>
                 decoration: BoxDecoration(
                   color: AppColors.background,
                   border: Border(
-                    bottom: BorderSide(color: Colors.white.withAlpha(15), width: 1),
+                    bottom: BorderSide(
+                      color: Colors.white.withAlpha(15),
+                      width: 1,
+                    ),
                   ),
                 ),
                 child: Row(
@@ -215,7 +218,10 @@ class _ConsentScreenState extends State<ConsentScreen>
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: AppColors.knobCenter,
-                          border: Border.all(color: AppColors.knobOuter, width: 1),
+                          border: Border.all(
+                            color: AppColors.knobOuter,
+                            width: 1,
+                          ),
                         ),
                         child: const Icon(
                           Icons.chevron_left,

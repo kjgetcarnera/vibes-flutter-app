@@ -81,7 +81,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
     });
     // await _tts.speak('Tell us about yourself. Just two things to get started.');
     await _tts.speak(
-      "hey. i've been waiting to hear your voice. Just two things to get started.",
+      "hey - i've been waiting to hear your voice - Just two things to get started.",
     );
   }
 
@@ -382,13 +382,13 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                                   child: ShaderMask(
                                     shaderCallback: (bounds) =>
                                         const LinearGradient(
-                                      colors: [
-                                        Color(0xFF2FE17A),
-                                        Color(0xFF00FFF7),
-                                      ],
-                                      begin: Alignment.centerLeft,
-                                      end: Alignment.centerRight,
-                                    ).createShader(bounds),
+                                          colors: [
+                                            Color(0xFF2FE17A),
+                                            Color(0xFF00FFF7),
+                                          ],
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
+                                        ).createShader(bounds),
                                     child: Text(
                                       'privacy policy →',
                                       style: AppTextStyles.caption.copyWith(
