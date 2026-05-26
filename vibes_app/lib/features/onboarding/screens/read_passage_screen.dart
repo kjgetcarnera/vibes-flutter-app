@@ -106,6 +106,8 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
   bool _isRecording = false;
   bool _isPaused = false;
   bool _isSubmitting = false;
+  bool _submitted = false;
+  String? _recordedPath;
 
   static const int _minRecordSeconds = 30;
   int _activeRecordSeconds = 0;
@@ -223,24 +225,45 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
     }
 
     _recordTimer?.cancel();
-    setState(() => _isSubmitting = true);
+    _rotationController.stop();
+    setState(() {
+      _isSubmitting = true;
+      _isRecording = false;
+    });
 
-    final path = await _recorder.stop();
-    setState(() => _isRecording = false);
-
-    if (path == null) {
-      _showError('Recording failed. Please try again.');
-      setState(() => _isSubmitting = false);
-      return;
+    String? path;
+    try {
+      path = await _recorder.stop();
+    } catch (_) {
+      path = null;
     }
 
     if (!mounted) return;
+
+    if (path == null) {
+      _showError('Recording failed. Please try again.');
+      setState(() {
+        _isSubmitting = false;
+        _isRecording = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _recordedPath = path;
+      _submitted = true;
+      _isSubmitting = false;
+    });
+  }
+
+  void _navigateToLoading() {
+    if (_recordedPath == null) return;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         pageBuilder: (_, __, ___) => VibeLoadingScreen(
           firstName: widget.firstName,
           age: widget.age,
-          audioFile: File(path),
+          audioFile: File(_recordedPath!),
           latitude: widget.latitude,
           longitude: widget.longitude,
         ),
@@ -453,6 +476,71 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                       ),
                     ),
                   )
+                : _submitted
+                // ── Captured confirmation + navigate button ──
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1E2026),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            ShaderMask(
+                              shaderCallback: (bounds) => AppColors
+                                  .accentGradient2
+                                  .createShader(bounds),
+                              child: Text(
+                                '✓ ${_activeRecordSeconds}s captured',
+                                style: AppTextStyles.bodyMono.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'reading your frequency…',
+                              style: AppTextStyles.bodyMono.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: _navigateToLoading,
+                        child: Container(
+                          height: 52,
+                          decoration: BoxDecoration(
+                            gradient: AppColors.accentGradient,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          alignment: Alignment.center,
+                          child: const Text(
+                            'Read My Frequency →',
+                            style: TextStyle(
+                              fontFamily: 'Kamerik105',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: -0.36,
+                              color: AppColors.background,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
                 : !_recordingStarted
                 // "start recording" button
                 ? GestureDetector(
@@ -468,7 +556,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                       ),
                       alignment: Alignment.center,
                       child: const Text(
-                        'start recording',
+                        'Start Recording',
                         style: TextStyle(
                           fontFamily: 'Kamerik105',
                           fontSize: 18,
@@ -554,12 +642,24 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Text(
-                        'aim for 30-60 seconds',
-                        style: AppTextStyles.bodyMono.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
+                      _canSubmit
+                          ? ShaderMask(
+                              shaderCallback: (bounds) => AppColors
+                                  .accentGradient2
+                                  .createShader(bounds),
+                              child: Text(
+                                'solid — tap ✓ when you\'re done',
+                                style: AppTextStyles.bodyMono.copyWith(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              'aim for 30-60 seconds',
+                              style: AppTextStyles.bodyMono.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
                       const SizedBox(height: 12),
                       // Rotating VAIA image
                       AnimatedBuilder(
