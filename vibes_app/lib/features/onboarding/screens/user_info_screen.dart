@@ -415,7 +415,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
               child: SizedBox(
                 width: double.infinity,
                 child: AppPrimaryButton(
-                  label: "let's hear it →",
+                  label: "Let's Hear It →",
                   onTap: _onNext,
                   enabled: _isFormValid,
                 ),

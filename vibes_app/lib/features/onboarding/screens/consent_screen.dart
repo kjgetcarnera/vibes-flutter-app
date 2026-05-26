@@ -378,7 +378,7 @@ class _ConsentScreenState extends State<ConsentScreen>
                                       ? AppColors.accentGradient2
                                       : null,
                                   color: active
-                                      ? null
+                                      ? AppColors.accentGreen2
                                       : AppColors.indicatorInactive,
                                 ),
                               );
@@ -403,7 +403,7 @@ class _ConsentScreenState extends State<ConsentScreen>
                 child: SizedBox(
                   width: double.infinity,
                   child: AppPrimaryButton(
-                    label: 'begin my vibe check →',
+                    label: 'Begin My Vibe Check →',
                     onTap: _allChecked
                         ? () => Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
