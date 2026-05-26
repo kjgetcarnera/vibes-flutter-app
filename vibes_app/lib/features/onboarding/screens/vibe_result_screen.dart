@@ -238,7 +238,7 @@ class _VibeResultScreenState extends State<VibeResultScreen>
                               ),
                               alignment: Alignment.center,
                               child: Text(
-                                'Re-record',
+                                'Read Again',
                                 style: AppTextStyles.kamerikToggle.copyWith(
                                   fontSize: 16,
                                   color: AppColors.background,
@@ -829,6 +829,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
 
   int _currentPage = 0;
   int? _playingId;
+  int? _loadingId;
   PlayerState _playerState = PlayerState.stopped;
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
@@ -858,7 +859,14 @@ class _AudioCarouselState extends State<_AudioCarousel> {
 
     _handler.playerStateStream.listen((s) {
       if (!mounted) return;
-      setState(() => _playerState = s);
+      setState(() {
+        _playerState = s;
+        if (s == PlayerState.playing ||
+            s == PlayerState.paused ||
+            s == PlayerState.completed) {
+          _loadingId = null;
+        }
+      });
       if (s == PlayerState.completed) {
         setState(() {
           _playingId = null;
@@ -924,10 +932,15 @@ class _AudioCarouselState extends State<_AudioCarousel> {
       if (index == -1) return;
       setState(() {
         _playingId = audio.id;
+        _loadingId = audio.id;
         _position = Duration.zero;
         _duration = Duration.zero;
       });
       await _handler.playAudio(index: index);
+      // Fallback: clear loader if stream never fired
+      if (mounted && _loadingId == audio.id) {
+        setState(() => _loadingId = null);
+      }
     }
   }
 
@@ -1109,22 +1122,35 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                                           width: 1,
                                         ),
                                       ),
-                                      child: ShaderMask(
-                                        shaderCallback: (b) =>
-                                            const LinearGradient(
-                                              colors: [
-                                                Color(0xFF2FE17A),
-                                                Color(0xFF00FFF7),
-                                              ],
-                                            ).createShader(b),
-                                        child: Icon(
-                                          isPlaying
-                                              ? Icons.pause
-                                              : Icons.play_arrow,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                      ),
+                                      child: _loadingId == audio.id
+                                          ? const SizedBox(
+                                              width: 18,
+                                              height: 18,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(
+                                                  Color(0xFF2FE17A),
+                                                ),
+                                              ),
+                                            )
+                                          : ShaderMask(
+                                              shaderCallback: (b) =>
+                                                  const LinearGradient(
+                                                    colors: [
+                                                      Color(0xFF2FE17A),
+                                                      Color(0xFF00FFF7),
+                                                    ],
+                                                  ).createShader(b),
+                                              child: Icon(
+                                                isPlaying
+                                                    ? Icons.pause
+                                                    : Icons.play_arrow,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                            ),
                                     ),
                                   ),
                                   const SizedBox(width: 10),
