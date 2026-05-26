@@ -9,7 +9,7 @@ import '../../../core/widgets/app_auth_field.dart';
 import '../../../core/widgets/app_icon_badge.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/location_fetcher.dart';
-import 'read_passage_screen.dart';
+import 'consent_screen.dart';
 
 class UserInfoScreen extends StatefulWidget {
   const UserInfoScreen({super.key});
@@ -195,7 +195,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ReadPassageScreen(
+        builder: (_) => ConsentScreen(
           firstName: _firstNameController.text.trim(),
           age: int.parse(_ageController.text.trim()),
           latitude: _locationResult?.latitude,
