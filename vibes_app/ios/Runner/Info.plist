@@ -28,6 +28,8 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>App uses your location to personalise your brain state analysis.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>App uses your location to personalise your brain state analysis.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>App needs microphone access to analyze your voice vibrations.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
