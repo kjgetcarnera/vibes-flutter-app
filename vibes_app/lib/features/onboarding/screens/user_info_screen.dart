@@ -228,6 +228,37 @@ class _UserInfoScreenState extends State<UserInfoScreen>
             LocationFetcher(
               onResult: (result) => setState(() => _locationResult = result),
             ),
+            // ── Sticky top nav bar ──
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Container(
+                  padding: EdgeInsets.only(
+                    top: topPad + 8,
+                    left: 20,
+                    right: 20,
+                    bottom: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Colors.white.withAlpha(15),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SizedBox(width: 36),
+                      AppIconBadge(isSpeaking: _isSpeaking),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             Expanded(
               child: FadeTransition(
                 opacity: _fadeAnimation,
@@ -235,8 +266,8 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                   position: _slideAnimation,
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    padding: EdgeInsets.only(
-                      top: topPad + 20,
+                    padding: const EdgeInsets.only(
+                      top: 20,
                       left: 24,
                       right: 24,
                       bottom: 24,
@@ -244,12 +275,6 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Speaking indicator
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: AppIconBadge(isSpeaking: _isSpeaking),
-                        ),
-                        const SizedBox(height: 10),
                         // VAIA branding
                         ShaderMask(
                           shaderCallback: (bounds) => const LinearGradient(
@@ -280,13 +305,19 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                         // Intro body copy
                         Text(
                           "i'm VAIA — your frequency guide. speak, get your vibe score, find your sound. one loop at a time.",
-                          style: AppTextStyles.bodyMono.copyWith(height: 1.6),
+                          style: AppTextStyles.bodyMono.copyWith(
+                            height: 1.6,
+                            fontSize: 14,
+                          ),
                         ),
                         const SizedBox(height: 14),
                         // Bold mission text
                         RichText(
                           text: TextSpan(
-                            style: AppTextStyles.bodyMono.copyWith(height: 1.6),
+                            style: AppTextStyles.bodyMono.copyWith(
+                              height: 1.6,
+                              fontSize: 14,
+                            ),
                             children: const [
                               TextSpan(
                                 text: 'brain health is a birthright. ',
@@ -368,6 +399,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                             style: AppTextStyles.caption.copyWith(
                               color: AppColors.textSecondary,
                               height: 1.5,
+                              fontSize: 12,
                             ),
                             children: [
                               const TextSpan(text: '🔒 '),
@@ -394,6 +426,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                                       style: AppTextStyles.caption.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
+                                        fontSize: 12,
                                       ),
                                     ),
                                   ),
