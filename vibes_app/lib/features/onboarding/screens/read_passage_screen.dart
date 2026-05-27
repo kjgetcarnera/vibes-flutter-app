@@ -11,6 +11,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/widgets/app_icon_badge.dart';
 import '../../../core/widgets/mic_permission_guard.dart';
+import 'consent_screen.dart';
 import 'vibe_loading_screen.dart';
 
 class _Passage {
@@ -113,6 +114,17 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
   int _activeRecordSeconds = 0;
   Timer? _recordTimer;
 
+  // Silence detection — rolling average over last 3 readings
+  // Calibrated from real device: room noise ≈ -28 to -30, speech ≈ -4 to -17
+  static const double _silenceThresholdDb = -24.0;
+  static const int _silenceWarnSeconds = 6;
+  static const int _silenceAutoPauseSeconds = 20;
+  final List<double> _ampHistory = [];
+  int _silenceSeconds = 0;
+  bool _silenceWarning = false;
+  bool _checkingAmplitude = false;
+  double _micLevel = 0.0; // 0.0–1.0 normalised for the level bar
+
   bool get _canSubmit =>
       _isRecording && _activeRecordSeconds >= _minRecordSeconds;
 
@@ -196,17 +208,88 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
 
   void _startTimer() {
     _recordTimer?.cancel();
+    _checkingAmplitude = false;
     _recordTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted && _isRecording && !_isPaused) {
-        setState(() => _activeRecordSeconds++);
-      }
+      if (!mounted || !_isRecording || _isPaused) return;
+      setState(() => _activeRecordSeconds++);
+      _pollAmplitude();
     });
+  }
+
+  Future<void> _pollAmplitude() async {
+    if (_checkingAmplitude || !_isRecording || _isPaused) return;
+    _checkingAmplitude = true;
+    try {
+      final amp = await _recorder.getAmplitude();
+      if (!mounted || !_isRecording || _isPaused) return;
+
+      final db = amp.current;
+      // print('[MIC] amplitude: ${db.toStringAsFixed(1)} dBFS');
+
+      // Normalise dBFS (-60 → 0.0, 0 → 1.0) for the level bar
+      final level = ((db + 60.0) / 60.0).clamp(0.0, 1.0);
+
+      // Rolling average over last 3 readings for stable detection
+      _ampHistory.add(db);
+      if (_ampHistory.length > 3) _ampHistory.removeAt(0);
+      final avgDb = _ampHistory.reduce((a, b) => a + b) / _ampHistory.length;
+      final isSilent = avgDb < _silenceThresholdDb;
+
+      if (isSilent) {
+        final newSeconds = _silenceSeconds + 1;
+        if (newSeconds >= _silenceAutoPauseSeconds) {
+          await _recorder.pause();
+          _rotationController.stop();
+          _recordTimer?.cancel();
+          if (mounted) {
+            // Strip silent seconds from the active count — they don't count toward the 30s minimum
+            final validSeconds = (_activeRecordSeconds - newSeconds).clamp(
+              0,
+              _activeRecordSeconds,
+            );
+            setState(() {
+              _isPaused = true;
+              _activeRecordSeconds = validSeconds;
+              _silenceSeconds = 0;
+              _silenceWarning = false;
+              _micLevel = 0.0;
+            });
+            _showError(
+              'No voice detected — recording paused. Tap ▶ to resume.',
+            );
+          }
+        } else {
+          setState(() {
+            _silenceSeconds = newSeconds;
+            _silenceWarning = newSeconds >= _silenceWarnSeconds;
+            _micLevel = level;
+          });
+        }
+      } else {
+        setState(() {
+          _silenceSeconds = 0;
+          _silenceWarning = false;
+          _micLevel = level;
+        });
+      }
+    } catch (e) {
+      // print('[MIC] getAmplitude error: $e');
+    } finally {
+      _checkingAmplitude = false;
+    }
   }
 
   Future<void> _togglePause() async {
     if (_isPaused) {
       await _recorder.resume();
       _rotationController.repeat();
+      _ampHistory.clear();
+      setState(() {
+        _silenceSeconds = 0;
+        _silenceWarning = false;
+        _checkingAmplitude = false;
+        _micLevel = 0.0;
+      });
       _startTimer();
     } else {
       await _recorder.pause();
@@ -226,9 +309,14 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
 
     _recordTimer?.cancel();
     _rotationController.stop();
+    _ampHistory.clear();
     setState(() {
       _isSubmitting = true;
       _isRecording = false;
+      _silenceSeconds = 0;
+      _silenceWarning = false;
+      _checkingAmplitude = false;
+      _micLevel = 0.0;
     });
 
     String? path;
@@ -276,7 +364,17 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
 
   Future<void> _cancel() async {
     await _recorder.stop();
-    if (mounted) Navigator.of(context).pop();
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => ConsentScreen(
+          firstName: widget.firstName,
+          age: widget.age,
+          latitude: widget.latitude,
+          longitude: widget.longitude,
+        ),
+      ),
+    );
   }
 
   void _showError(String message) {
@@ -650,6 +748,34 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                         ],
                       ),
                       const SizedBox(height: 16),
+                      // Mic level bar
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          height: 4,
+                          width: double.infinity,
+                          color: Colors.white10,
+                          child: FractionallySizedBox(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: _micLevel,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: _silenceWarning
+                                    ? const LinearGradient(
+                                        colors: [
+                                          Color(0xFFFFB020),
+                                          Color(0xFFFF6B00),
+                                        ],
+                                      )
+                                    : AppColors.accentGradient2,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       _canSubmit
                           ? ShaderMask(
                               shaderCallback: (bounds) => AppColors
@@ -660,6 +786,13 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                                 style: AppTextStyles.bodyMono.copyWith(
                                   color: Colors.white,
                                 ),
+                              ),
+                            )
+                          : _silenceWarning
+                          ? Text(
+                              '🎙 we can\'t hear you — speak up or check your mic',
+                              style: AppTextStyles.bodyMono.copyWith(
+                                color: const Color(0xFFFFB020),
                               ),
                             )
                           : Text(
