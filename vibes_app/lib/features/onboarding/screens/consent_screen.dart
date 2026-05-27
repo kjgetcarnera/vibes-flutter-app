@@ -261,7 +261,7 @@ class _ConsentScreenState extends State<ConsentScreen>
                       const SizedBox(height: 16),
                       // Headline
                       Text(
-                        'tick each box to confirm you understand.',
+                        'Tick each box to confirm you understand.',
                         style: AppTextStyles.displayLarge.copyWith(
                           fontSize: 30,
                           fontWeight: FontWeight.w900,
@@ -273,7 +273,10 @@ class _ConsentScreenState extends State<ConsentScreen>
                       // Sub-copy
                       Text(
                         'your voice is powerful. before you share it, i want to make sure you know exactly how we use it — and why it matters.',
-                        style: AppTextStyles.bodyMono.copyWith(height: 1.7),
+                        style: AppTextStyles.bodyMono.copyWith(
+                          height: 1.7,
+                          fontSize: 14,
+                        ),
                       ),
                       const SizedBox(height: 28),
                       // Consent cards
@@ -301,6 +304,7 @@ class _ConsentScreenState extends State<ConsentScreen>
                             style: AppTextStyles.caption.copyWith(
                               color: AppColors.textSecondary,
                               height: 1.7,
+                              fontSize: 12,
                             ),
                             children: [
                               const TextSpan(
@@ -389,6 +393,7 @@ class _ConsentScreenState extends State<ConsentScreen>
                             '$_checkedCount of ${_items.length} confirmed',
                             style: AppTextStyles.caption.copyWith(
                               color: AppColors.textSecondary,
+                              fontSize: 12,
                             ),
                           ),
                         ],

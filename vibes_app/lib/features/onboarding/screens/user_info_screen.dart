@@ -81,7 +81,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
     });
     // await _tts.speak('Tell us about yourself. Just two things to get started.');
     await _tts.speak(
-      "hey - i've been waiting to hear your voice - Just two things to get started.",
+      "Hey - I've been waiting to hear your voice - Just two things to get started.",
     );
   }
 
@@ -294,7 +294,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                         const SizedBox(height: 16),
                         // Main headline
                         Text(
-                          "hey, i've been waiting to hear\nyour voice.",
+                          "Hey, i've been waiting to hear\nyour voice.",
                           style: AppTextStyles.displayLarge.copyWith(
                             fontSize: 32,
                             height: 1.15,

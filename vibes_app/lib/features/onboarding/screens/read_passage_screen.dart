@@ -366,12 +366,13 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                           style: AppTextStyles.labelSmall.copyWith(
                             color: Colors.white,
                             letterSpacing: 1.5,
+                            fontSize: 13,
                           ),
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'read aloud at your natural pace. no performance — just your voice, right now.',
+                        'Read aloud at your natural pace. no performance — just your voice, right now.',
                         style: AppTextStyles.bodyMono.copyWith(height: 1.6),
                       ),
                       const SizedBox(height: 24),
@@ -544,25 +545,32 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                 : !_recordingStarted
                 // "start recording" button
                 ? GestureDetector(
-                    onTap: () {
-                      setState(() => _recordingStarted = true);
-                      _startRecording();
-                    },
-                    child: Container(
-                      height: 52,
-                      decoration: BoxDecoration(
-                        gradient: AppColors.accentGradient,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Start Recording',
-                        style: TextStyle(
-                          fontFamily: 'Kamerik105',
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: -0.36,
-                          color: AppColors.background,
+                    onTap: _isSpeaking
+                        ? null
+                        : () {
+                            setState(() => _recordingStarted = true);
+                            _startRecording();
+                          },
+                    child: Opacity(
+                      opacity: _isSpeaking ? 0.4 : 1.0,
+                      child: Container(
+                        height: 52,
+                        decoration: BoxDecoration(
+                          gradient: AppColors.accentGradient,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          _isSpeaking
+                              ? 'VAIA is speaking...'
+                              : 'Start Recording',
+                          style: const TextStyle(
+                            fontFamily: 'Kamerik105',
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: -0.36,
+                            color: AppColors.background,
+                          ),
                         ),
                       ),
                     ),
