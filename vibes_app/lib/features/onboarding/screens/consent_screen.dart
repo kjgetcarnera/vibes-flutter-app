@@ -272,7 +272,7 @@ class _ConsentScreenState extends State<ConsentScreen>
                       const SizedBox(height: 16),
                       // Sub-copy
                       Text(
-                        'your voice is powerful. before you share it, i want to make sure you know exactly how we use it — and why it matters.',
+                        'Your voice is powerful. Before you share it, I want to make sure you know exactly how we use it — and why it matters.',
                         style: AppTextStyles.bodyMono.copyWith(
                           height: 1.7,
                           fontSize: 14,
@@ -309,7 +309,7 @@ class _ConsentScreenState extends State<ConsentScreen>
                             children: [
                               const TextSpan(
                                 text:
-                                    'by continuing you confirm you are 18+ and consent to the above. read our full ',
+                                    'By continuing you confirm you are 18+ and consent to the above. Read our full ',
                               ),
                               WidgetSpan(
                                 alignment: PlaceholderAlignment.middle,
@@ -324,7 +324,7 @@ class _ConsentScreenState extends State<ConsentScreen>
                                         .accentGradient2
                                         .createShader(bounds),
                                     child: Text(
-                                      'privacy policy',
+                                      'Privacy Policy',
                                       style: AppTextStyles.caption.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -347,7 +347,7 @@ class _ConsentScreenState extends State<ConsentScreen>
                                         .accentGradient2
                                         .createShader(bounds),
                                     child: Text(
-                                      'terms of use',
+                                      'Terms of Use',
                                       style: AppTextStyles.caption.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,

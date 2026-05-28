@@ -294,7 +294,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                         const SizedBox(height: 16),
                         // Main headline
                         Text(
-                          "Hey, i've been waiting to hear\nyour voice.",
+                          "Hey, I've been waiting to hear\nyour voice.",
                           style: AppTextStyles.displayLarge.copyWith(
                             fontSize: 32,
                             height: 1.15,
@@ -304,7 +304,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                         const SizedBox(height: 20),
                         // Intro body copy
                         Text(
-                          "i'm VAIA — your frequency guide. speak, get your vibe score, find your sound. one loop at a time.",
+                          "I'm VAIA — your frequency guide. Speak, get your vibe score, find your sound. One loop at a time.",
                           style: AppTextStyles.bodyMono.copyWith(
                             height: 1.6,
                             fontSize: 14,
@@ -320,7 +320,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                             ),
                             children: const [
                               TextSpan(
-                                text: 'brain health is a birthright. ',
+                                text: 'Brain health is a birthright. ',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.textPrimary,
@@ -328,7 +328,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                               ),
                               TextSpan(
                                 text:
-                                    'your voice helps make it real for everyone — from Boston to Belize.',
+                                    'Your voice helps make it real for everyone — from Boston to Belize.',
                               ),
                             ],
                           ),
@@ -361,7 +361,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                         ),
                         const SizedBox(height: 14),
                         AppAuthField(
-                          hint: 'your name',
+                          hint: 'Your name',
                           prefixIcon: Icons.person_outline,
                           controller: _firstNameController,
                           focusNode: _firstNameFocus,
@@ -376,7 +376,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                         ),
                         const SizedBox(height: 14),
                         AppAuthField(
-                          hint: 'your age',
+                          hint: 'Your age',
                           prefixIcon: Icons.cake_outlined,
                           controller: _ageController,
                           focusNode: _ageFocus,
@@ -405,7 +405,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                               const TextSpan(text: '🔒 '),
                               const TextSpan(
                                 text:
-                                    'your voice is private — no identity attached, never sold. ',
+                                    'Your voice is private — no identity attached, never sold. ',
                               ),
                               WidgetSpan(
                                 alignment: PlaceholderAlignment.middle,
@@ -422,7 +422,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                                           end: Alignment.centerRight,
                                         ).createShader(bounds),
                                     child: Text(
-                                      'privacy policy →',
+                                      'Privacy Policy →',
                                       style: AppTextStyles.caption.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,

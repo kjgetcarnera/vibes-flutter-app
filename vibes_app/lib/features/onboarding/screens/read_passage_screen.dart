@@ -470,7 +470,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Read aloud at your natural pace. no performance — just your voice, right now.',
+                        'Read aloud at your natural pace. No performance — just your voice, right now.',
                         style: AppTextStyles.bodyMono.copyWith(height: 1.6),
                       ),
                       const SizedBox(height: 24),
@@ -782,7 +782,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                                   .accentGradient2
                                   .createShader(bounds),
                               child: Text(
-                                'solid — tap ✓ when you\'re done',
+                                'Solid — tap ✓ when you\'re done',
                                 style: AppTextStyles.bodyMono.copyWith(
                                   color: Colors.white,
                                 ),
@@ -790,13 +790,13 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                             )
                           : _silenceWarning
                           ? Text(
-                              '🎙 we can\'t hear you — speak up or check your mic',
+                              '🎙 We can\'t hear you — speak up or check your mic',
                               style: AppTextStyles.bodyMono.copyWith(
                                 color: const Color(0xFFFFB020),
                               ),
                             )
                           : Text(
-                              'aim for 30-60 seconds',
+                              'Aim for 30-60 seconds',
                               style: AppTextStyles.bodyMono.copyWith(
                                 color: AppColors.textSecondary,
                               ),
