@@ -9,6 +9,7 @@ import '../../../core/widgets/app_auth_field.dart';
 import '../../../core/widgets/app_icon_badge.dart';
 import '../../../core/widgets/app_primary_button.dart';
 import '../../../core/widgets/location_fetcher.dart';
+import '../../../core/services/vibe_api_service.dart';
 import 'consent_screen.dart';
 
 class UserInfoScreen extends StatefulWidget {
@@ -193,11 +194,17 @@ class _UserInfoScreenState extends State<UserInfoScreen>
     FocusScope.of(context).unfocus();
     if (!_validate()) return;
 
+    final name = _firstNameController.text.trim();
+    final age = int.parse(_ageController.text.trim());
+
+    // Fire-and-forget — user doesn't wait for this
+    VibeApiService.updateUserProfile(name: name, age: age);
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ConsentScreen(
-          firstName: _firstNameController.text.trim(),
-          age: int.parse(_ageController.text.trim()),
+          firstName: name,
+          age: age,
           latitude: _locationResult?.latitude,
           longitude: _locationResult?.longitude,
         ),

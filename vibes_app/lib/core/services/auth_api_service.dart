@@ -14,8 +14,7 @@ class AuthException implements Exception {
 }
 
 class AuthApiService {
-  static const String _baseUrl =
-      'http://vibes--ecsap-trtfwism8oul-104387100.us-east-1.elb.amazonaws.com';
+  static const String _baseUrl = 'http://uat.api.getvibes.ai';
 
   static Future<AuthResult> login({
     required String email,

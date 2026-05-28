@@ -16,8 +16,7 @@ class VibeApiException implements Exception {
 }
 
 class VibeApiService {
-  static const String _baseUrl =
-      'http://vibes--ecsap-trtfwism8oul-104387100.us-east-1.elb.amazonaws.com';
+  static const String _baseUrl = 'http://uat.api.getvibes.ai';
 
   /// POST /api/v1/score  (phase = pre)
   ///
@@ -30,7 +29,8 @@ class VibeApiService {
     double? longitude,
   }) async {
     final uri = Uri.parse('$_baseUrl/api/v1/score');
-    final journeyId = currentJourneyId ??
+    final journeyId =
+        currentJourneyId ??
         (100000000 + Random().nextInt(900000000)); // 9-digit random
 
     final audioSize = await audioFile.length();
@@ -38,7 +38,9 @@ class VibeApiService {
     print('━━━━━━━━━━━━ [VIBE] REQUEST ━━━━━━━━━━━━');
     print('[VIBE] POST $uri');
     print('[VIBE] Headers:');
-    print('         Authorization: Bearer ${AuthSession.instance.accessToken?.substring(0, 20)}...');
+    print(
+      '         Authorization: Bearer ${AuthSession.instance.accessToken?.substring(0, 20)}...',
+    );
     print('         accept: application/json');
     print('[VIBE] Fields (multipart/form-data):');
     print('         phase            = pre');
@@ -66,7 +68,9 @@ class VibeApiService {
 
     try {
       final stopwatch = Stopwatch()..start();
-      final streamed = await request.send().timeout(const Duration(seconds: 60));
+      final streamed = await request.send().timeout(
+        const Duration(seconds: 60),
+      );
       final response = await http.Response.fromStream(streamed);
       stopwatch.stop();
 
@@ -76,7 +80,9 @@ class VibeApiService {
       print('[VIBE] Duration: ${stopwatch.elapsedMilliseconds} ms');
       print('[VIBE] Body:');
       try {
-        final pretty = const JsonEncoder.withIndent('  ').convert(jsonDecode(response.body));
+        final pretty = const JsonEncoder.withIndent(
+          '  ',
+        ).convert(jsonDecode(response.body));
         print(pretty);
       } catch (_) {
         print(response.body);
@@ -132,6 +138,57 @@ class VibeApiService {
       print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       print('');
       rethrow;
+    }
+  }
+
+  static Future<void> updateUserProfile({
+    required String name,
+    required int age,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/api/v1/users/me');
+    final requestBody = {'name': name, 'age': age};
+
+    print('');
+    print('━━━━━━━━━━━━ [USER] REQUEST ━━━━━━━━━━━━');
+    print('[USER] PATCH $uri');
+    print('[USER] Headers:');
+    print(
+      '         Authorization: Bearer ${AuthSession.instance.accessToken?.substring(0, 20)}...',
+    );
+    print('         Content-Type: application/json');
+    print('[USER] Body: ${jsonEncode(requestBody)}');
+    print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    print('');
+
+    try {
+      final response = await http
+          .patch(
+            uri,
+            headers: {
+              'Content-Type': 'application/json',
+              'accept': 'application/json',
+              'Authorization': AuthSession.instance.authHeader,
+            },
+            body: jsonEncode(requestBody),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      print('');
+      print('━━━━━━━━━━━━ [USER] RESPONSE ━━━━━━━━━━━━');
+      print('[USER] Status: ${response.statusCode}');
+      print('[USER] Body:');
+      try {
+        final pretty = const JsonEncoder.withIndent(
+          '  ',
+        ).convert(jsonDecode(response.body));
+        print(pretty);
+      } catch (_) {
+        print(response.body);
+      }
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      print('');
+    } catch (e) {
+      print('[USER] Profile update exception: $e');
     }
   }
 
