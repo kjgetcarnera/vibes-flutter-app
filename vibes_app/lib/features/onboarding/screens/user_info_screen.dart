@@ -345,14 +345,14 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                         Row(
                           children: [
                             _FeatureCard(
-                              title: 'speak',
+                              title: 'Speak',
                               subtitle: 'read a passage',
                             ),
                             const SizedBox(width: 10),
-                            _FeatureCard(title: 'score', subtitle: 'BRS + Hz'),
+                            _FeatureCard(title: 'Score', subtitle: 'BRS + Hz'),
                             const SizedBox(width: 10),
                             _FeatureCard(
-                              title: 'shift',
+                              title: 'Shift',
                               subtitle: 'listen + rate',
                             ),
                           ],
