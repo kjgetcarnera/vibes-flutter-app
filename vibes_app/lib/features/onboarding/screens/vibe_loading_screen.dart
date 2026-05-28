@@ -19,6 +19,7 @@ class VibeLoadingScreen extends StatefulWidget {
     required this.audioFile,
     this.latitude,
     this.longitude,
+    this.passageIndex,
   });
 
   final String firstName;
@@ -26,6 +27,7 @@ class VibeLoadingScreen extends StatefulWidget {
   final File audioFile;
   final double? latitude;
   final double? longitude;
+  final int? passageIndex;
 
   @override
   State<VibeLoadingScreen> createState() => _VibeLoadingScreenState();
@@ -83,6 +85,7 @@ class _VibeLoadingScreenState extends State<VibeLoadingScreen>
           result: result,
           latitude: widget.latitude,
           longitude: widget.longitude,
+          passageIndex: widget.passageIndex,
         ),
         transitionsBuilder: (_, anim, __, child) =>
             FadeTransition(opacity: anim, child: child),

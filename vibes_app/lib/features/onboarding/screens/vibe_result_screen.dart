@@ -26,6 +26,7 @@ class VibeResultScreen extends StatefulWidget {
     required this.result,
     this.latitude,
     this.longitude,
+    this.passageIndex,
   });
 
   final String firstName;
@@ -34,6 +35,7 @@ class VibeResultScreen extends StatefulWidget {
   final VibeCheckResult result;
   final double? latitude;
   final double? longitude;
+  final int? passageIndex;
 
   @override
   State<VibeResultScreen> createState() => _VibeResultScreenState();
@@ -103,6 +105,7 @@ class _VibeResultScreenState extends State<VibeResultScreen>
           age: widget.age,
           latitude: widget.latitude,
           longitude: widget.longitude,
+          excludePassageIndex: widget.passageIndex,
         ),
         transitionsBuilder: (_, anim, __, child) =>
             FadeTransition(opacity: anim, child: child),
@@ -236,6 +239,31 @@ class _VibeResultScreenState extends State<VibeResultScreen>
                             _AudioCarousel(audios: r.recommendedAudios),
                             const SizedBox(height: 30),
                           ],
+
+                          // Listening suggestion
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withAlpha(10),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white.withAlpha(20),
+                              ),
+                            ),
+                            child: Text(
+                              'We suggest you listen to it for a minimum of 10 – 15 minutes to see a change in your Brain Scores',
+                              style: AppTextStyles.bodyMono.copyWith(
+                                color: AppColors.textSecondary,
+                                height: 1.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
 
                           // Re-record
                           GestureDetector(
@@ -487,38 +515,57 @@ class _FrequencyScoreCard extends StatelessWidget {
           ),
           const SizedBox(height: 18),
 
-          // Score row — matches Figma: score left, badge + CTA right
+          // Hz + badge row
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Left column
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        ShaderMask(
-                          shaderCallback: (b) =>
-                              LinearGradient(colors: [c1, c2]).createShader(b),
-                          child: Text(
-                            result.frequencyScore.toStringAsFixed(1),
-                            style: _kBigNumber.copyWith(color: Colors.white),
-                          ),
+              // Left — Hz number (replaces old score)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      ShaderMask(
+                        shaderCallback: (b) =>
+                            LinearGradient(colors: [c1, c2]).createShader(b),
+                        child: Text(
+                          result.frequencyHz.toStringAsFixed(1),
+                          style: _kBigNumber.copyWith(color: Colors.white),
                         ),
-                        const SizedBox(width: 4),
-                        Text('/100', style: _kMuted),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text('Hz', style: _kBody),
+                    ],
+                  ),
+                  if (result.frequencyBandMin > 0 ||
+                      result.frequencyBandMax > 0) ...[
                     const SizedBox(height: 4),
-                    Text('Just Now', style: _kCaption),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: c2.withAlpha(200),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        'Band: ${result.frequencyBandMin.toStringAsFixed(0)}–${result.frequencyBandMax.toStringAsFixed(0)} Hz',
+                        style: _kCaption.copyWith(
+                          color: const Color(0xFFE8E8E8),
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    ),
                   ],
-                ),
+                ],
               ),
 
-              // Right column — badge + CTA
+              const Spacer(),
+
+              // Right — badge + CTA
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -555,79 +602,15 @@ class _FrequencyScoreCard extends StatelessWidget {
           Divider(color: Colors.white.withAlpha(20), height: 1),
           const SizedBox(height: 14),
 
-          // Hz row — left: Hz big, right: meaning + recommendation
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Left — Hz
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      ShaderMask(
-                        shaderCallback: (b) =>
-                            LinearGradient(colors: [c1, c2]).createShader(b),
-                        child: Text(
-                          result.frequencyHz.toStringAsFixed(1),
-                          style: _kHzNumber.copyWith(color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text('Hz', style: _kBody),
-                    ],
-                  ),
-                  if (result.frequencyBandMin > 0 ||
-                      result.frequencyBandMax > 0) ...[
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: c2.withAlpha(200),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        'Band: ${result.frequencyBandMin.toStringAsFixed(0)}–${result.frequencyBandMax.toStringAsFixed(0)} Hz',
-                        style: _kCaption.copyWith(
-                          color: const Color(0xFFE8E8E8),
-                          letterSpacing: 0.4,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-
-              const SizedBox(width: 16),
-
-              // Right — meaning + recommendation
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      result.frequencyMeaning,
-                      style: _kMonoSm,
-                      textAlign: TextAlign.right,
-                    ),
-                    if (result.frequencyRecommendation.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        result.frequencyRecommendation,
-                        style: _kMonoSm.copyWith(color: AppColors.textMuted),
-                        textAlign: TextAlign.right,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
+          // Meaning + recommendation — full width
+          Text(result.frequencyMeaning, style: _kMonoSm),
+          if (result.frequencyRecommendation.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              result.frequencyRecommendation,
+              style: _kMonoSm.copyWith(color: AppColors.textMuted),
+            ),
+          ],
         ],
       ),
     );
@@ -642,13 +625,6 @@ final _kBigNumber = GoogleFonts.inter(
   fontWeight: FontWeight.w700,
   color: const Color(0xFFFFFEFE),
   letterSpacing: -1,
-);
-
-final _kHzNumber = GoogleFonts.inter(
-  fontSize: 36,
-  fontWeight: FontWeight.w700,
-  color: const Color(0xFFFFFEFE),
-  letterSpacing: -0.5,
 );
 
 final _kCardTitle = GoogleFonts.inter(
@@ -984,11 +960,12 @@ class _AudioCarouselState extends State<_AudioCarousel> {
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 12),
           child: Text(
-            "Let's change that:",
+            // "Let's change that:",
+            "Based on your scores, VAIA has picked these audios for you. Tap play to listen.",
             style: const TextStyle(
               fontFamily: 'PPSupplyMono',
-              fontSize: 22,
-              fontWeight: FontWeight.w300,
+              fontSize: 20,
+              fontWeight: FontWeight.w400,
               color: Color(0xFFFFFFFE),
               letterSpacing: -0.48,
             ),

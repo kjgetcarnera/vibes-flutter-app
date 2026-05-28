@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -78,12 +79,14 @@ class ReadPassageScreen extends StatefulWidget {
     required this.age,
     this.latitude,
     this.longitude,
+    this.excludePassageIndex,
   });
 
   final String firstName;
   final int age;
   final double? latitude;
   final double? longitude;
+  final int? excludePassageIndex;
 
   @override
   State<ReadPassageScreen> createState() => _ReadPassageScreenState();
@@ -100,7 +103,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
   bool _ttsDisposed = false;
   bool _isSpeaking = false;
 
-  int _passageIndex = 0;
+  late int _passageIndex;
   bool _recordingStarted = false;
 
   final AudioRecorder _recorder = AudioRecorder();
@@ -128,9 +131,20 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
   bool get _canSubmit =>
       _isRecording && _activeRecordSeconds >= _minRecordSeconds;
 
+  static int _pickPassageIndex(int? exclude) {
+    if (_passages.length == 1) return 0;
+    final rng = Random();
+    int idx;
+    do {
+      idx = rng.nextInt(_passages.length);
+    } while (idx == exclude);
+    return idx;
+  }
+
   @override
   void initState() {
     super.initState();
+    _passageIndex = _pickPassageIndex(widget.excludePassageIndex);
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
@@ -343,6 +357,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
           audioFile: File(_recordedPath!),
           latitude: widget.latitude,
           longitude: widget.longitude,
+          passageIndex: _passageIndex,
         ),
         transitionsBuilder: (_, anim, __, child) =>
             FadeTransition(opacity: anim, child: child),
@@ -508,7 +523,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
                                   ),
                                 ),
                                 child: Text(
-                                  'swap',
+                                  'change passage',
                                   style: AppTextStyles.bodyMono.copyWith(
                                     color: AppColors.textPrimary,
                                   ),
