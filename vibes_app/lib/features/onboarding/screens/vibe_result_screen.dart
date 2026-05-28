@@ -361,40 +361,42 @@ class _BrainReadinessCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Left — big score with gradient
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      ShaderMask(
-                        shaderCallback: (b) => gradient.createShader(b),
-                        child: Text(
-                          result.brainReadinessScore.toStringAsFixed(1),
-                          style: _kBigNumber.copyWith(color: Colors.white),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        ShaderMask(
+                          shaderCallback: (b) => gradient.createShader(b),
+                          child: Text(
+                            result.brainReadinessScore.toStringAsFixed(1),
+                            style: _kBigNumber.copyWith(color: Colors.white),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text('/100', style: _kMuted),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text('Just Now', style: _kCaption),
-                ],
+                        const SizedBox(width: 4),
+                        Text('/100', style: _kMuted),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text('Just Now', style: _kCaption),
+                  ],
+                ),
               ),
 
-              const Spacer(),
+              const SizedBox(width: 12),
 
-              // Right — state info
-              Flexible(
+              // Right — state info (max 140px so it never overflows)
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 140),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Dot: gradient if two colors, flat if one
                         ShaderMask(
                           shaderCallback: (b) => gradient.createShader(b),
                           child: Container(
@@ -407,9 +409,13 @@ class _BrainReadinessCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 7),
-                        Text(
-                          _formatState(result.brainState),
-                          style: _kStateName,
+                        Flexible(
+                          child: Text(
+                            _formatState(result.brainState),
+                            style: _kStateName,
+                            textAlign: TextAlign.right,
+                            softWrap: true,
+                          ),
                         ),
                       ],
                     ),
@@ -420,6 +426,7 @@ class _BrainReadinessCard extends StatelessWidget {
                         result.brainStateSubtitle,
                         style: _kMonoSm.copyWith(color: Colors.white),
                         textAlign: TextAlign.right,
+                        softWrap: true,
                       ),
                     ),
                     const SizedBox(height: 3),
@@ -1011,7 +1018,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                 duration: const Duration(milliseconds: 300),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final coverWidth = constraints.maxWidth * 0.30;
+                    final coverWidth = constraints.maxWidth * 0.38;
                     return Container(
                       margin: const EdgeInsets.only(right: 12),
                       decoration: BoxDecoration(

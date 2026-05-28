@@ -473,7 +473,7 @@ class _FeatureCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
@@ -483,6 +483,7 @@ class _FeatureCard extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
               Text(
@@ -490,6 +491,7 @@ class _FeatureCard extends StatelessWidget {
                 style: AppTextStyles.caption.copyWith(
                   color: AppColors.textSecondary,
                 ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
