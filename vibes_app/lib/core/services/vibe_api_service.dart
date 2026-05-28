@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import 'package:http/http.dart' as http;
 import '../models/vibe_check_result.dart';
 import 'auth_session.dart';
@@ -24,14 +23,10 @@ class VibeApiService {
   /// Stores the returned session_id in AuthSession for later post-session use.
   static Future<VibeCheckResult> submitPreScore({
     required File audioFile,
-    int? currentJourneyId,
     double? latitude,
     double? longitude,
   }) async {
-    final uri = Uri.parse('$_baseUrl/api/v1/score');
-    final journeyId =
-        currentJourneyId ??
-        (100000000 + Random().nextInt(900000000)); // 9-digit random
+    final uri = Uri.parse('$_baseUrl/api/v1/score/hackathon');
 
     final audioSize = await audioFile.length();
     print('');
@@ -43,8 +38,8 @@ class VibeApiService {
     );
     print('         accept: application/json');
     print('[VIBE] Fields (multipart/form-data):');
-    print('         phase            = pre');
-    print('         current_journey_id = $journeyId');
+    if (latitude != null) print('         latitude  = $latitude');
+    if (longitude != null) print('         longitude = $longitude');
     print('[VIBE] File:');
     print('         audio  path=${audioFile.path}');
     print('         audio  size=${(audioSize / 1024).toStringAsFixed(1)} KB');
@@ -53,9 +48,7 @@ class VibeApiService {
 
     final request = http.MultipartRequest('POST', uri)
       ..headers['Authorization'] = AuthSession.instance.authHeader
-      ..headers['accept'] = 'application/json'
-      ..fields['phase'] = 'pre'
-      ..fields['current_journey_id'] = journeyId.toString();
+      ..headers['accept'] = 'application/json';
     if (latitude != null) request.fields['latitude'] = latitude.toString();
     if (longitude != null) request.fields['longitude'] = longitude.toString();
     request.files.add(
@@ -111,6 +104,10 @@ class VibeApiService {
           print('━━━━━━━━━━━━ [VIBE] scores.brain_frequency ━━━━━━━━━━━━');
           print(encoder.convert(scores['brain_frequency']));
           print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+          print('');
+          print('━━━━━━━━━━━━ [VIBE] recommended_audios ━━━━━━━━━━━━');
+          print(encoder.convert(data['recommended_audios']));
+          print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
           print('');
         } catch (e) {
           print('[VIBE] Could not extract scores for logging: $e');
