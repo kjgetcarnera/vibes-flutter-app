@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
@@ -25,7 +25,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  final FlutterTts _tts = FlutterTts();
+  final AudioPlayer _tts = AudioPlayer();
   bool _ttsDisposed = false;
   bool _isSpeaking = false;
 
@@ -67,29 +67,17 @@ class _UserInfoScreenState extends State<UserInfoScreen>
 
   Future<void> _speakIntro() async {
     if (_ttsDisposed) return;
-    await _tts.setLanguage('en-US');
-    if (_ttsDisposed) return;
-    await _tts.setSpeechRate(0.35);
-    if (_ttsDisposed) return;
-    _tts.setStartHandler(() {
-      if (!_ttsDisposed) setState(() => _isSpeaking = true);
+    _tts.onPlayerStateChanged.listen((s) {
+      if (_ttsDisposed) return;
+      setState(() => _isSpeaking = s == PlayerState.playing);
     });
-    _tts.setCompletionHandler(() {
-      if (!_ttsDisposed) setState(() => _isSpeaking = false);
-    });
-    _tts.setCancelHandler(() {
-      if (!_ttsDisposed) setState(() => _isSpeaking = false);
-    });
-    // await _tts.speak('Tell us about yourself. Just two things to get started.');
-    await _tts.speak(
-      "Hey - I've been waiting to hear your voice - Just two things to get started.",
-    );
+    await _tts.play(AssetSource('audio/first-voice.mp3'));
   }
 
   @override
   void dispose() {
     _ttsDisposed = true;
-    _tts.stop();
+    _tts.dispose();
     _fadeController.dispose();
     _firstNameController.dispose();
     _ageController.dispose();
@@ -294,7 +282,6 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                             style: AppTextStyles.labelSmall.copyWith(
                               color: Colors.white,
                               letterSpacing: 2,
-                              fontSize: 14,
                             ),
                           ),
                         ),
@@ -403,7 +390,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                         // Privacy note
                         Text.rich(
                           TextSpan(
-                            style: AppTextStyles.caption.copyWith(
+                            style: AppTextStyles.bodyMono.copyWith(
                               color: AppColors.textSecondary,
                               height: 1.5,
                               fontSize: 12,
@@ -430,7 +417,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                                         ).createShader(bounds),
                                     child: Text(
                                       'Privacy Policy →',
-                                      style: AppTextStyles.caption.copyWith(
+                                      style: AppTextStyles.bodyMono.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 12,
@@ -492,6 +479,7 @@ class _FeatureCard extends StatelessWidget {
               Text(
                 title,
                 style: AppTextStyles.bodyMono.copyWith(
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),

@@ -4,7 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../core/constants/app_colors.dart';
@@ -96,7 +96,7 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
   late Animation<Offset> _slideAnimation;
   late AnimationController _rotationController;
 
-  final FlutterTts _tts = FlutterTts();
+  final AudioPlayer _tts = AudioPlayer();
   bool _ttsDisposed = false;
   bool _isSpeaking = false;
 
@@ -154,28 +154,17 @@ class _ReadPassageScreenState extends State<ReadPassageScreen>
 
   Future<void> _speakIntro() async {
     if (_ttsDisposed) return;
-    await _tts.setLanguage('en-US');
-    if (_ttsDisposed) return;
-    await _tts.setSpeechRate(0.35);
-    if (_ttsDisposed) return;
-    _tts.setStartHandler(() {
-      if (!_ttsDisposed) setState(() => _isSpeaking = true);
+    _tts.onPlayerStateChanged.listen((s) {
+      if (_ttsDisposed) return;
+      setState(() => _isSpeaking = s == PlayerState.playing);
     });
-    _tts.setCompletionHandler(() {
-      if (!_ttsDisposed) setState(() => _isSpeaking = false);
-    });
-    _tts.setCancelHandler(() {
-      if (!_ttsDisposed) setState(() => _isSpeaking = false);
-    });
-    await _tts.speak(
-      "When you are ready - click the start recording button and Read this passage aloud - at your natural pace. no performance — just your voice, right now.",
-    );
+    await _tts.play(AssetSource('audio/THird-Voice.mp3'));
   }
 
   @override
   void dispose() {
     _ttsDisposed = true;
-    _tts.stop();
+    _tts.dispose();
     _recordTimer?.cancel();
     _fadeController.dispose();
     _rotationController.dispose();

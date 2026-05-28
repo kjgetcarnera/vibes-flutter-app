@@ -45,6 +45,9 @@ class _VibeResultScreenState extends State<VibeResultScreen>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
+  final AudioPlayer _tts = AudioPlayer();
+  bool _ttsDisposed = false;
+
   // final AudioPlayer _player = AudioPlayer();
   // PlayerState _playerState = PlayerState.stopped;
   // Duration _position = Duration.zero;
@@ -65,6 +68,7 @@ class _VibeResultScreenState extends State<VibeResultScreen>
       begin: const Offset(0, 0.05),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+    Future.delayed(const Duration(milliseconds: 800), _speakIntro);
 
     // _player.onPlayerStateChanged.listen((s) {
     //   if (mounted) setState(() => _playerState = s);
@@ -77,8 +81,15 @@ class _VibeResultScreenState extends State<VibeResultScreen>
     // });
   }
 
+  Future<void> _speakIntro() async {
+    if (_ttsDisposed) return;
+    await _tts.play(AssetSource('audio/FOurth-voice.mp3'));
+  }
+
   @override
   void dispose() {
+    _ttsDisposed = true;
+    _tts.dispose();
     _fadeController.dispose();
     // _player.dispose();
     super.dispose();
@@ -396,7 +407,10 @@ class _BrainReadinessCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 7),
-                        Text(_formatState(result.brainState), style: _kStateName),
+                        Text(
+                          _formatState(result.brainState),
+                          style: _kStateName,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 5),

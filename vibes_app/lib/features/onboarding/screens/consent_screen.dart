@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
@@ -32,7 +32,7 @@ class _ConsentScreenState extends State<ConsentScreen>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  final FlutterTts _tts = FlutterTts();
+  final AudioPlayer _tts = AudioPlayer();
   bool _ttsDisposed = false;
   bool _isSpeaking = false;
 
@@ -84,28 +84,17 @@ class _ConsentScreenState extends State<ConsentScreen>
 
   Future<void> _speakIntro() async {
     if (_ttsDisposed) return;
-    await _tts.setLanguage('en-US');
-    if (_ttsDisposed) return;
-    await _tts.setSpeechRate(0.35);
-    if (_ttsDisposed) return;
-    _tts.setStartHandler(() {
-      if (!_ttsDisposed) setState(() => _isSpeaking = true);
+    _tts.onPlayerStateChanged.listen((s) {
+      if (_ttsDisposed) return;
+      setState(() => _isSpeaking = s == PlayerState.playing);
     });
-    _tts.setCompletionHandler(() {
-      if (!_ttsDisposed) setState(() => _isSpeaking = false);
-    });
-    _tts.setCancelHandler(() {
-      if (!_ttsDisposed) setState(() => _isSpeaking = false);
-    });
-    await _tts.speak(
-      'Before we begin - tick each box to confirm you understand.',
-    );
+    await _tts.play(AssetSource('audio/Second-voice.mp3'));
   }
 
   @override
   void dispose() {
     _ttsDisposed = true;
-    _tts.stop();
+    _tts.dispose();
     _fadeController.dispose();
     super.dispose();
   }
