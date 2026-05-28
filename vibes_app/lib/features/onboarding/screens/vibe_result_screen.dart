@@ -376,40 +376,42 @@ class _BrainReadinessCard extends StatelessWidget {
               const Spacer(),
 
               // Right — state info
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Dot: gradient if two colors, flat if one
-                      ShaderMask(
-                        shaderCallback: (b) => gradient.createShader(b),
-                        child: Container(
-                          width: 12,
-                          height: 12,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Dot: gradient if two colors, flat if one
+                        ShaderMask(
+                          shaderCallback: (b) => gradient.createShader(b),
+                          child: Container(
+                            width: 12,
+                            height: 12,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 7),
-                      Text(_formatState(result.brainState), style: _kStateName),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  ShaderMask(
-                    shaderCallback: (b) => gradient.createShader(b),
-                    child: Text(
-                      result.brainStateSubtitle,
-                      style: _kMonoSm.copyWith(color: Colors.white),
-                      textAlign: TextAlign.right,
+                        const SizedBox(width: 7),
+                        Text(_formatState(result.brainState), style: _kStateName),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text('Your Brain State', style: _kCaption),
-                ],
+                    const SizedBox(height: 5),
+                    ShaderMask(
+                      shaderCallback: (b) => gradient.createShader(b),
+                      child: Text(
+                        result.brainStateSubtitle,
+                        style: _kMonoSm.copyWith(color: Colors.white),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text('Your Brain State', style: _kCaption),
+                  ],
+                ),
               ),
             ],
           ),
@@ -841,6 +843,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
     // Register full playlist with the handler so lock screen next/prev work
     _handler.loadQueue(
       widget.audios
+          .where((a) => a.audioUrl.isNotEmpty)
           .map(
             (a) => QueueEntry(
               item: MediaItem(
@@ -987,218 +990,236 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                     )
                   : 0.0;
 
+              final bool hasUrl = audio.audioUrl.isNotEmpty;
+
               return AnimatedScale(
                 scale: _currentPage == i ? 1.0 : 0.96,
                 duration: const Duration(milliseconds: 300),
-                child: Container(
-                  margin: const EdgeInsets.only(right: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF111316),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.white.withAlpha(isActive ? 35 : 15),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      // ── Cover image (full height, square) ──
-                      ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          bottomLeft: Radius.circular(15),
-                        ),
-                        child: Image.network(
-                          audio.coverImageUrl,
-                          width: 140,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            width: 140,
-                            color: AppColors.knobCenter,
-                            child: const Icon(
-                              Icons.music_note,
-                              color: AppColors.textMuted,
-                              size: 32,
-                            ),
-                          ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final coverWidth = constraints.maxWidth * 0.30;
+                    return Container(
+                      margin: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF111316),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.white.withAlpha(isActive ? 35 : 15),
+                          width: 1,
                         ),
                       ),
+                      child: Row(
+                        children: [
+                          // ── Cover image (30% width) ──
+                          ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(15),
+                              bottomLeft: Radius.circular(15),
+                            ),
+                            child: audio.coverImageUrl.isNotEmpty
+                                ? Image.network(
+                                    audio.coverImageUrl,
+                                    width: coverWidth,
+                                    height: double.infinity,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) =>
+                                        _coverPlaceholder(coverWidth),
+                                  )
+                                : _coverPlaceholder(coverWidth),
+                          ),
 
-                      // ── Right panel ──
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // TRACK label + share icon
-                              Row(
+                          // ── Right panel ──
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                14,
+                                12,
+                                12,
+                                12,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
-                                    'TRACK',
-                                    style: TextStyle(
+                                  // TRACK label + share icon
+                                  Row(
+                                    children: [
+                                      const Text(
+                                        'TRACK',
+                                        style: TextStyle(
+                                          fontFamily: 'Kamerik105',
+                                          fontSize: 10,
+                                          fontStyle: FontStyle.normal,
+                                          fontWeight: FontWeight.w700,
+                                          height: 24 / 10,
+                                          letterSpacing: 0.2,
+                                          color: Color(0xFF646464),
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      // Container(
+                                      //   width: 28,
+                                      //   height: 28,
+                                      //   decoration: BoxDecoration(
+                                      //     shape: BoxShape.circle,
+                                      //     color: AppColors.knobCenter,
+                                      //     border: Border.all(
+                                      //       color: AppColors.knobOuter,
+                                      //       width: 1,
+                                      //     ),
+                                      //   ),
+                                      //   child: const Icon(
+                                      //     Icons.ios_share,
+                                      //     color: AppColors.textSecondary,
+                                      //     size: 13,
+                                      //   ),
+                                      // ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 5),
+
+                                  // Track name
+                                  Text(
+                                    audio.name,
+                                    style: const TextStyle(
+                                      fontFamily: 'Kamerik105',
+                                      fontSize: 16,
+                                      fontStyle: FontStyle.normal,
+                                      fontWeight: FontWeight.w700,
+                                      height: 24 / 16,
+                                      letterSpacing: 0.4,
+                                      color: Colors.white,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+
+                                  // Subtitle
+                                  Text(
+                                    audio.subtitle,
+                                    style: const TextStyle(
                                       fontFamily: 'Kamerik105',
                                       fontSize: 10,
                                       fontStyle: FontStyle.normal,
-                                      fontWeight: FontWeight.w700,
+                                      fontWeight: FontWeight.w400,
                                       height: 24 / 10,
                                       letterSpacing: 0.2,
-                                      color: Color(0xFF646464),
+                                      color: Colors.white,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
+
                                   const Spacer(),
-                                  // Container(
-                                  //   width: 28,
-                                  //   height: 28,
-                                  //   decoration: BoxDecoration(
-                                  //     shape: BoxShape.circle,
-                                  //     color: AppColors.knobCenter,
-                                  //     border: Border.all(
-                                  //       color: AppColors.knobOuter,
-                                  //       width: 1,
-                                  //     ),
-                                  //   ),
-                                  //   child: const Icon(
-                                  //     Icons.ios_share,
-                                  //     color: AppColors.textSecondary,
-                                  //     size: 13,
-                                  //   ),
-                                  // ),
-                                ],
-                              ),
-                              const SizedBox(height: 5),
 
-                              // Track name
-                              Text(
-                                audio.name,
-                                style: const TextStyle(
-                                  fontFamily: 'Kamerik105',
-                                  fontSize: 16,
-                                  fontStyle: FontStyle.normal,
-                                  fontWeight: FontWeight.w700,
-                                  height: 24 / 16,
-                                  letterSpacing: 0.4,
-                                  color: Colors.white,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-
-                              // Subtitle
-                              Text(
-                                audio.subtitle,
-                                style: const TextStyle(
-                                  fontFamily: 'Kamerik105',
-                                  fontSize: 10,
-                                  fontStyle: FontStyle.normal,
-                                  fontWeight: FontWeight.w400,
-                                  height: 24 / 10,
-                                  letterSpacing: 0.2,
-                                  color: Colors.white,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-
-                              const Spacer(),
-
-                              // Play button + waveform row
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  // Play/pause
-                                  GestureDetector(
-                                    onTap: () => _togglePlay(audio),
-                                    child: Container(
-                                      width: 38,
-                                      height: 38,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: AppColors.knobCenter,
-                                        border: Border.all(
-                                          color: AppColors.knobOuter,
-                                          width: 1,
+                                  // Play button + waveform row
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      // Play/pause
+                                      GestureDetector(
+                                        onTap: hasUrl
+                                            ? () => _togglePlay(audio)
+                                            : null,
+                                        child: Opacity(
+                                          opacity: hasUrl ? 1.0 : 0.35,
+                                          child: Container(
+                                            width: 38,
+                                            height: 38,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: AppColors.knobCenter,
+                                              border: Border.all(
+                                                color: AppColors.knobOuter,
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: _loadingId == audio.id
+                                                ? const SizedBox(
+                                                    width: 18,
+                                                    height: 18,
+                                                    child: CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      valueColor:
+                                                          AlwaysStoppedAnimation<
+                                                            Color
+                                                          >(Color(0xFF2FE17A)),
+                                                    ),
+                                                  )
+                                                : hasUrl
+                                                ? ShaderMask(
+                                                    shaderCallback: (b) =>
+                                                        const LinearGradient(
+                                                          colors: [
+                                                            Color(0xFF2FE17A),
+                                                            Color(0xFF00FFF7),
+                                                          ],
+                                                        ).createShader(b),
+                                                    child: Icon(
+                                                      isPlaying
+                                                          ? Icons.pause
+                                                          : Icons.play_arrow,
+                                                      color: Colors.white,
+                                                      size: 20,
+                                                    ),
+                                                  )
+                                                : const Icon(
+                                                    Icons.play_disabled,
+                                                    color: Color(0xFF3A3F4A),
+                                                    size: 20,
+                                                  ),
+                                          ),
                                         ),
                                       ),
-                                      child: _loadingId == audio.id
-                                          ? const SizedBox(
-                                              width: 18,
-                                              height: 18,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                valueColor:
-                                                    AlwaysStoppedAnimation<
-                                                        Color>(
-                                                  Color(0xFF2FE17A),
+                                      const SizedBox(width: 10),
+
+                                      // Waveform + time stacked
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(
+                                              height: 28,
+                                              child: CustomPaint(
+                                                painter: _WaveformPainter(
+                                                  progress: progress.toDouble(),
+                                                  seed: audio.id,
+                                                ),
+                                                size: const Size(
+                                                  double.infinity,
+                                                  28,
                                                 ),
                                               ),
-                                            )
-                                          : ShaderMask(
-                                              shaderCallback: (b) =>
-                                                  const LinearGradient(
-                                                    colors: [
-                                                      Color(0xFF2FE17A),
-                                                      Color(0xFF00FFF7),
-                                                    ],
-                                                  ).createShader(b),
-                                              child: Icon(
-                                                isPlaying
-                                                    ? Icons.pause
-                                                    : Icons.play_arrow,
-                                                color: Colors.white,
-                                                size: 20,
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              isActive
+                                                  ? '${_fmt(_position)}  |  ${_fmt(_duration)}'
+                                                  : '00:00  |  --:--',
+                                              style: const TextStyle(
+                                                fontFamily: 'PPSupplyMono',
+                                                fontSize: 8,
+                                                color: Color(0xFF939AA6),
+                                                letterSpacing: 0.16,
+                                                fontWeight: FontWeight.w400,
                                               ),
                                             ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-
-                                  // Waveform + time stacked
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: 28,
-                                          child: CustomPaint(
-                                            painter: _WaveformPainter(
-                                              progress: progress.toDouble(),
-                                              seed: audio.id,
-                                            ),
-                                            size: const Size(
-                                              double.infinity,
-                                              28,
-                                            ),
-                                          ),
+                                          ],
                                         ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          isActive
-                                              ? '${_fmt(_position)}  |  ${_fmt(_duration)}'
-                                              : '00:00  |  --:--',
-                                          style: const TextStyle(
-                                            fontFamily: 'PPSupplyMono',
-                                            fontSize: 8,
-                                            color: Color(0xFF939AA6),
-                                            letterSpacing: 0.16,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               );
             },
@@ -1246,6 +1267,16 @@ class _AudioCarouselState extends State<_AudioCarousel> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _coverPlaceholder(double width) {
+    return Container(
+      width: width,
+      color: const Color(0xFF1E2026),
+      child: const Center(
+        child: Icon(Icons.music_note, color: Color(0xFF3A3F4A), size: 28),
+      ),
     );
   }
 }
