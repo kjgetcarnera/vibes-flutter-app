@@ -329,20 +329,26 @@ class _UserInfoScreenState extends State<UserInfoScreen>
                         ),
                         const SizedBox(height: 28),
                         // Feature cards row
-                        Row(
-                          children: [
-                            _FeatureCard(
-                              title: 'Speak',
-                              subtitle: 'read a passage',
-                            ),
-                            const SizedBox(width: 10),
-                            _FeatureCard(title: 'Score', subtitle: 'BRS + Hz'),
-                            const SizedBox(width: 10),
-                            _FeatureCard(
-                              title: 'Shift',
-                              subtitle: 'listen + rate',
-                            ),
-                          ],
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _FeatureCard(
+                                title: 'Speak',
+                                subtitle: 'read a passage',
+                              ),
+                              const SizedBox(width: 10),
+                              _FeatureCard(
+                                title: 'Score',
+                                subtitle: 'BRS + Hz',
+                              ),
+                              const SizedBox(width: 10),
+                              _FeatureCard(
+                                title: 'Shift',
+                                subtitle: 'listen + rate',
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 28),
                         // Section label
@@ -464,37 +470,34 @@ class _FeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: SizedBox(
-        height: 80,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E2026),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                title,
-                style: AppTextStyles.bodyMono.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E2026),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              title,
+              style: AppTextStyles.bodyMono.copyWith(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
               ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textSecondary,
               ),
-            ],
-          ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
