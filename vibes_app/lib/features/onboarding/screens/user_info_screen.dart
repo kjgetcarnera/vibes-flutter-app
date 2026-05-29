@@ -71,7 +71,7 @@ class _UserInfoScreenState extends State<UserInfoScreen>
       if (_ttsDisposed) return;
       setState(() => _isSpeaking = s == PlayerState.playing);
     });
-    await _tts.play(AssetSource('audio/first-voice.mp3'));
+    await _tts.play(AssetSource('audio/first_audio.mp3'));
   }
 
   @override

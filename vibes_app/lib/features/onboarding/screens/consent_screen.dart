@@ -87,7 +87,7 @@ class _ConsentScreenState extends State<ConsentScreen>
       if (_ttsDisposed) return;
       setState(() => _isSpeaking = s == PlayerState.playing);
     });
-    await _tts.play(AssetSource('audio/Second-voice.mp3'));
+    await _tts.play(AssetSource('audio/second_audio.mp3'));
   }
 
   @override
