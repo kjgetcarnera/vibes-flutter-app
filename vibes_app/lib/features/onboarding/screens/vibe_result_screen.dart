@@ -256,7 +256,7 @@ class _VibeResultScreenState extends State<VibeResultScreen>
                               ),
                             ),
                             child: Text(
-                              'We suggest you listen to it for a minimum of 10 – 15 minutes to see a change in your Brain Scores',
+                              'Chosen for your brain state right now.',
                               style: AppTextStyles.bodyMono.copyWith(
                                 color: AppColors.textSecondary,
                                 height: 1.5,
@@ -277,7 +277,7 @@ class _VibeResultScreenState extends State<VibeResultScreen>
                               ),
                               alignment: Alignment.center,
                               child: Text(
-                                'Read Again',
+                                'Read Again after listening',
                                 style: AppTextStyles.kamerikToggle.copyWith(
                                   fontSize: 16,
                                   color: AppColors.background,
@@ -386,7 +386,7 @@ class _BrainReadinessCard extends StatelessWidget {
 
           // Score + state row
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Left — big score with gradient
               Expanded(
@@ -416,9 +416,8 @@ class _BrainReadinessCard extends StatelessWidget {
 
               const SizedBox(width: 12),
 
-              // Right — state info (max 140px so it never overflows)
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 140),
+              // Right — state info
+              Flexible(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -442,7 +441,8 @@ class _BrainReadinessCard extends StatelessWidget {
                             _formatState(result.brainState),
                             style: _kStateName,
                             textAlign: TextAlign.right,
-                            softWrap: true,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -517,7 +517,7 @@ class _FrequencyScoreCard extends StatelessWidget {
 
           // Hz + badge row
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Left — Hz number (replaces old score)
               Column(
@@ -584,15 +584,6 @@ class _FrequencyScoreCard extends StatelessWidget {
                       style: _kCaption.copyWith(color: c1, letterSpacing: 0.3),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: 130,
-                    child: Text(
-                      '${result.frequencyCta} →→',
-                      style: _kMonoSm,
-                      textAlign: TextAlign.right,
-                    ),
-                  ),
                 ],
               ),
             ],
@@ -643,7 +634,7 @@ final _kStateName = GoogleFonts.inter(
 
 const _kBody = TextStyle(
   fontFamily: 'PPSupplyMono',
-  fontSize: 12,
+  fontSize: 13,
   fontWeight: FontWeight.w400,
   color: Color(0xB3FFFEFE),
   height: 1.5,
@@ -651,7 +642,7 @@ const _kBody = TextStyle(
 
 const _kMonoSm = TextStyle(
   fontFamily: 'PPSupplyMono',
-  fontSize: 11,
+  fontSize: 13,
   fontWeight: FontWeight.w500,
   color: Color(0xFFFFFEFE),
   height: 1.4,
@@ -659,7 +650,7 @@ const _kMonoSm = TextStyle(
 
 const _kCaption = TextStyle(
   fontFamily: 'PPSupplyMono',
-  fontSize: 10,
+  fontSize: 12,
   fontWeight: FontWeight.w500,
   color: Color(0x80939AA6),
   letterSpacing: 0.6,
@@ -829,6 +820,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
   int _currentPage = 0;
   int? _playingId;
   int? _loadingId;
+  late final List<RecommendedAudio> _queuedAudios;
   PlayerState _playerState = PlayerState.stopped;
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
@@ -837,10 +829,11 @@ class _AudioCarouselState extends State<_AudioCarousel> {
   void initState() {
     super.initState();
 
-    // Register full playlist with the handler so lock screen next/prev work
+    // Only audios with a URL enter the queue — index must stay in sync
+    _queuedAudios = widget.audios.where((a) => a.audioUrl.isNotEmpty).toList();
+
     _handler.loadQueue(
-      widget.audios
-          .where((a) => a.audioUrl.isNotEmpty)
+      _queuedAudios
           .map(
             (a) => QueueEntry(
               item: MediaItem(
@@ -928,7 +921,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
         await _handler.play();
       }
     } else {
-      final index = widget.audios.indexWhere((a) => a.id == audio.id);
+      final index = _queuedAudios.indexWhere((a) => a.id == audio.id);
       if (index == -1) return;
       setState(() {
         _playingId = audio.id;
@@ -960,11 +953,10 @@ class _AudioCarouselState extends State<_AudioCarousel> {
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 12),
           child: Text(
-            // "Let's change that:",
-            "Based on your scores, VAIA has picked these audios for you. Tap play to listen.",
+            "Your 40Hz restorative audio is ready. Hit play. Let it work.",
             style: const TextStyle(
               fontFamily: 'PPSupplyMono',
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.w400,
               color: Color(0xFFFFFFFE),
               letterSpacing: -0.48,
@@ -972,7 +964,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
           ),
         ),
         SizedBox(
-          height: 160,
+          height: 200,
           child: PageView.builder(
             controller: _pageController,
             itemCount: widget.audios.length,
@@ -1017,6 +1009,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                             child: audio.coverImageUrl.isNotEmpty
                                 ? Image.network(
                                     audio.coverImageUrl,
+                                    key: ValueKey(audio.coverImageUrl),
                                     width: coverWidth,
                                     height: double.infinity,
                                     fit: BoxFit.cover,
@@ -1042,7 +1035,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                                   Row(
                                     children: [
                                       const Text(
-                                        'TRACK',
+                                        '40Hz RESTORATIVE AUDIO',
                                         style: TextStyle(
                                           fontFamily: 'Kamerik105',
                                           fontSize: 10,
@@ -1100,11 +1093,11 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                                       fontSize: 10,
                                       fontStyle: FontStyle.normal,
                                       fontWeight: FontWeight.w400,
-                                      height: 24 / 10,
+                                      height: 20 / 10,
                                       letterSpacing: 0.2,
                                       color: Colors.white,
                                     ),
-                                    maxLines: 1,
+                                    maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
 
@@ -1123,8 +1116,8 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                                         child: Opacity(
                                           opacity: hasUrl ? 1.0 : 0.35,
                                           child: Container(
-                                            width: 38,
-                                            height: 38,
+                                            width: 44,
+                                            height: 44,
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
                                               color: AppColors.knobCenter,
@@ -1199,7 +1192,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                                                   : '00:00  |  --:--',
                                               style: const TextStyle(
                                                 fontFamily: 'PPSupplyMono',
-                                                fontSize: 8,
+                                                fontSize: 12,
                                                 color: Color(0xFF939AA6),
                                                 letterSpacing: 0.16,
                                                 fontWeight: FontWeight.w400,
@@ -1253,7 +1246,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
         Padding(
           padding: const EdgeInsets.only(left: 25, right: 10),
           child: Text(
-            "After, we'll check in again. You'll hear how your voice shifted from wired to grounded.",
+            "10-15 minutes is all it takes. We'll read your voice again after to show you the shift.",
             style: const TextStyle(
               fontFamily: 'PPSupplyMono',
               fontSize: 18,
