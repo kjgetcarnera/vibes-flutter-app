@@ -118,61 +118,39 @@ class _UserInfoScreenState extends State<UserInfoScreen>
   void _openPrivacyPolicy(BuildContext context) {
     final controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse('https://www.privacypolicies.com/live/sample'));
+      ..loadRequest(Uri.parse('https://getvibes.ai/privacypolicy'));
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFF15171B),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.92,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (_, scrollController) => Column(
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => Scaffold(
+          backgroundColor: const Color(0xFF15171B),
+          appBar: AppBar(
+            backgroundColor: const Color(0xFF15171B),
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            title: ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [Color(0xFF2FE17A), Color(0xFF00FFF7)],
+              ).createShader(bounds),
+              child: const Text(
+                'Privacy Policy',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  letterSpacing: 0.5,
+                ),
               ),
             ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  ShaderMask(
-                    shaderCallback: (bounds) => const LinearGradient(
-                      colors: [Color(0xFF2FE17A), Color(0xFF00FFF7)],
-                    ).createShader(bounds),
-                    child: const Text(
-                      'Privacy Policy',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white54),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.close, color: Colors.white54),
+                onPressed: () => Navigator.of(context).pop(),
               ),
-            ),
-            const Divider(color: Colors.white12, height: 1),
-            Expanded(child: WebViewWidget(controller: controller)),
-          ],
+            ],
+          ),
+          body: WebViewWidget(controller: controller),
         ),
       ),
     );
@@ -482,7 +460,7 @@ class _FeatureCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: AppTextStyles.bodyMono.copyWith(
+              style: AppTextStyles.kamerikToggle.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
@@ -492,7 +470,8 @@ class _FeatureCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: AppTextStyles.caption.copyWith(
+              style: AppTextStyles.kamerikToggle.copyWith(
+                fontSize: 10,
                 color: AppColors.textSecondary,
               ),
               textAlign: TextAlign.center,

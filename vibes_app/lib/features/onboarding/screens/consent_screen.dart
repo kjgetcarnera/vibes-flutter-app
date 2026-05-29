@@ -45,22 +45,21 @@ class _ConsentScreenState extends State<ConsentScreen>
     _ConsentItem(
       title: 'Your voice trains MANTRA',
       body:
-          'Your recording helps build our voice biomarker model for brain health and cognitive wellness — the one that makes neurowellness accessible to everyone.',
+          'Your recording builds our voice biomarker model — the one making neurowellness accessible to everyone.',
     ),
     _ConsentItem(
       title: 'Research & community good',
       body:
-          'Your audio helps make brain health awareness and prevention possible for more people — from Boston to Belize. That\'s the mission.',
+          'Your audio expands brain health access for more people — from Boston to Belize.',
     ),
     _ConsentItem(
       title: 'Your voice is private',
       body:
-          'We don\'t sell it. We don\'t share it. Stored without personal identifiers and never attributed to your identity.',
+          'We don\'t sell it. We don\'t share it. No personal identifiers. Ever.',
     ),
     _ConsentItem(
       title: 'This is not medical care',
-      body:
-          'This is research and wellness exploration. No diagnosis, no medical advice, no individual clinical results.',
+      body: 'Research and wellness only. No diagnosis. No clinical results.',
     ),
   ];
 
@@ -104,55 +103,31 @@ class _ConsentScreenState extends State<ConsentScreen>
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..loadRequest(Uri.parse(url));
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFF15171B),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.92,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (_, __) => Column(
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => Scaffold(
+          backgroundColor: const Color(0xFF15171B),
+          appBar: AppBar(
+            backgroundColor: const Color(0xFF15171B),
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            title: ShaderMask(
+              shaderCallback: (bounds) =>
+                  AppColors.accentGradient2.createShader(bounds),
+              child: Text(
+                title,
+                style: AppTextStyles.headingBold.copyWith(color: Colors.white),
               ),
             ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  ShaderMask(
-                    shaderCallback: (bounds) =>
-                        AppColors.accentGradient2.createShader(bounds),
-                    child: Text(
-                      title,
-                      style: AppTextStyles.headingBold.copyWith(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white54),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.close, color: Colors.white54),
+                onPressed: () => Navigator.of(context).pop(),
               ),
-            ),
-            const Divider(color: Colors.white12, height: 1),
-            Expanded(child: WebViewWidget(controller: controller)),
-          ],
+            ],
+          ),
+          body: WebViewWidget(controller: controller),
         ),
       ),
     );
@@ -267,6 +242,14 @@ class _ConsentScreenState extends State<ConsentScreen>
                           fontSize: 14,
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Tap each statement below. Brain health is a birthright — not a privilege.',
+                        style: AppTextStyles.bodyMono.copyWith(
+                          height: 1.7,
+                          fontSize: 14,
+                        ),
+                      ),
                       const SizedBox(height: 28),
                       // Consent cards
                       ...List.generate(_items.length, (i) {
@@ -298,7 +281,7 @@ class _ConsentScreenState extends State<ConsentScreen>
                             children: [
                               const TextSpan(
                                 text:
-                                    'By continuing you confirm you are 18+ and consent to the above. Read our full ',
+                                    'By continuing you confirm you are 18+ and agree to our ',
                               ),
                               WidgetSpan(
                                 alignment: PlaceholderAlignment.middle,
@@ -306,7 +289,7 @@ class _ConsentScreenState extends State<ConsentScreen>
                                   onTap: () => _openWebSheet(
                                     context,
                                     'Privacy Policy',
-                                    'https://www.privacypolicies.com/live/sample',
+                                    'https://getvibes.ai/privacypolicy',
                                   ),
                                   child: ShaderMask(
                                     shaderCallback: (bounds) => AppColors
@@ -329,7 +312,7 @@ class _ConsentScreenState extends State<ConsentScreen>
                                   onTap: () => _openWebSheet(
                                     context,
                                     'Terms of Use',
-                                    'https://www.termsofusegenerator.net/live.php?token=sample',
+                                    'https://getvibes.ai/termsofuse',
                                   ),
                                   child: ShaderMask(
                                     shaderCallback: (bounds) => AppColors
