@@ -684,7 +684,7 @@ class _FrequencyScoreCard extends StatelessWidget {
 // Card-local text styles
 // ─────────────────────────────────────────────────────────────
 final _kBigNumber = GoogleFonts.inter(
-  fontSize: 50,
+  fontSize: 48,
   fontWeight: FontWeight.w700,
   color: const Color(0xFFFFFEFE),
   letterSpacing: -1,
@@ -1072,27 +1072,27 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                       ),
                       child: Row(
                         children: [
-                          // ── Cover image (30% width) ──
-                          ClipRRect(
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              bottomLeft: Radius.circular(15),
+                          // ── Cover image (38% width) ──
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: audio.coverImageUrl.isNotEmpty
+                                  ? Image.network(
+                                      audio.coverImageUrl,
+                                      key: ValueKey(audio.coverImageUrl),
+                                      width: coverWidth,
+                                      height: coverWidth,
+                                      fit: BoxFit.contain,
+                                      loadingBuilder: (_, child, progress) =>
+                                          progress == null
+                                          ? child
+                                          : _coverPlaceholder(coverWidth),
+                                      errorBuilder: (_, __, ___) =>
+                                          _coverPlaceholder(coverWidth),
+                                    )
+                                  : _coverPlaceholder(coverWidth),
                             ),
-                            child: audio.coverImageUrl.isNotEmpty
-                                ? Image.network(
-                                    audio.coverImageUrl,
-                                    key: ValueKey(audio.coverImageUrl),
-                                    width: coverWidth,
-                                    height: double.infinity,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (_, child, progress) =>
-                                        progress == null
-                                        ? child
-                                        : _coverPlaceholder(coverWidth),
-                                    errorBuilder: (_, __, ___) =>
-                                        _coverPlaceholder(coverWidth),
-                                  )
-                                : _coverPlaceholder(coverWidth),
                           ),
 
                           // ── Right panel ──
@@ -1251,7 +1251,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                                                   : '00:00  |  --:--',
                                               style: const TextStyle(
                                                 fontFamily: 'PPSupplyMono',
-                                                fontSize: 12,
+                                                fontSize: 11,
                                                 color: Color(0xFF939AA6),
                                                 letterSpacing: 0.16,
                                                 fontWeight: FontWeight.w400,
