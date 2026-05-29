@@ -117,32 +117,104 @@ class _VibeResultScreenState extends State<VibeResultScreen>
   Future<void> _logout() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF0D0F12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Logout?', style: AppTextStyles.headingBold),
-        content: Text(
-          'Are you sure you want to logout?',
-          style: AppTextStyles.bodyMono,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Cancel',
-              style: AppTextStyles.bodyMono.copyWith(
-                color: AppColors.textSecondary,
+      barrierColor: Colors.black.withAlpha(180),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1C1F26),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withAlpha(20), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(120),
+                blurRadius: 40,
+                spreadRadius: 4,
               ),
-            ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(
-              'Logout',
-              style: AppTextStyles.bodyMono.copyWith(color: Colors.redAccent),
-            ),
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.redAccent.withAlpha(25),
+                  border: Border.all(color: Colors.redAccent.withAlpha(80)),
+                ),
+                child: const Icon(
+                  Icons.logout_rounded,
+                  color: Colors.redAccent,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text('Logout?', style: AppTextStyles.headingBold),
+              const SizedBox(height: 8),
+              Text(
+                'Are you sure you want to logout?',
+                style: AppTextStyles.bodyMono.copyWith(
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pop(false),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(12),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.white.withAlpha(20)),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          style: AppTextStyles.bodyMono.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pop(true),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent.withAlpha(30),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: Colors.redAccent.withAlpha(120),
+                          ),
+                        ),
+                        child: Text(
+                          'Logout',
+                          style: AppTextStyles.bodyMono.copyWith(
+                            color: Colors.redAccent,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
 
@@ -1013,6 +1085,10 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                                     width: coverWidth,
                                     height: double.infinity,
                                     fit: BoxFit.cover,
+                                    loadingBuilder: (_, child, progress) =>
+                                        progress == null
+                                        ? child
+                                        : _coverPlaceholder(coverWidth),
                                     errorBuilder: (_, __, ___) =>
                                         _coverPlaceholder(coverWidth),
                                   )
@@ -1047,26 +1123,9 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                                         ),
                                       ),
                                       const Spacer(),
-                                      // Container(
-                                      //   width: 28,
-                                      //   height: 28,
-                                      //   decoration: BoxDecoration(
-                                      //     shape: BoxShape.circle,
-                                      //     color: AppColors.knobCenter,
-                                      //     border: Border.all(
-                                      //       color: AppColors.knobOuter,
-                                      //       width: 1,
-                                      //     ),
-                                      //   ),
-                                      //   child: const Icon(
-                                      //     Icons.ios_share,
-                                      //     color: AppColors.textSecondary,
-                                      //     size: 13,
-                                      //   ),
-                                      // ),
                                     ],
                                   ),
-                                  const SizedBox(height: 5),
+                                  const SizedBox(height: 7),
 
                                   // Track name
                                   Text(
@@ -1083,7 +1142,7 @@ class _AudioCarouselState extends State<_AudioCarousel> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  const SizedBox(height: 2),
+                                  const SizedBox(height: 4),
 
                                   // Subtitle
                                   Text(
@@ -1264,9 +1323,40 @@ class _AudioCarouselState extends State<_AudioCarousel> {
   Widget _coverPlaceholder(double width) {
     return Container(
       width: width,
-      color: const Color(0xFF1E2026),
-      child: const Center(
-        child: Icon(Icons.music_note, color: Color(0xFF3A3F4A), size: 28),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF1A1D24), Color(0xFF0F1116)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ShaderMask(
+              shaderCallback: (b) => const LinearGradient(
+                colors: [Color(0xFF2FE17A), Color(0xFF00FFF7)],
+              ).createShader(b),
+              child: const Icon(
+                Icons.graphic_eq_rounded,
+                color: Colors.white,
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              '40Hz',
+              style: TextStyle(
+                fontFamily: 'Kamerik105',
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF3A3F4A),
+                letterSpacing: 1.2,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
